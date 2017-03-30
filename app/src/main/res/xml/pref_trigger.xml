@@ -1,0 +1,41 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        android:key="@string/pref_key_trigger_wifi_ssid"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_trigger_wifi_ssid"/>
+    <SwitchPreference
+        android:key="@string/pref_key_trigger_wifi_enabled"
+        android:defaultValue="false"
+        android:title="@string/pref_title_trigger_wifi_enabled"
+        />
+
+    <SwitchPreference
+        android:key="@string/pref_key_trigger_time_turn_on_enabled"
+        android:defaultValue="false"
+        android:title="@string/pref_title_trigger_time_turn_on_enabled"
+        />
+
+    <EditTextPreference
+        android:key="@string/pref_key_trigger_time_turn_on_when"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_trigger_time_turn_on_when"/>
+
+    <SwitchPreference
+        android:key="@string/pref_key_trigger_time_turn_off_enabled"
+        android:defaultValue="false"
+        android:title="@string/pref_title_trigger_time_turn_off_enabled"
+        />
+
+    <EditTextPreference
+        android:key="@string/pref_key_trigger_time_turn_off_when"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_trigger_time_turn_off_when"/>
+</PreferenceScreen>

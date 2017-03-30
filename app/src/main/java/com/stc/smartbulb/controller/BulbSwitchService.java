@@ -1,4 +1,4 @@
-package com.stc.smartbulb;
+package com.stc.smartbulb.controller;
 
 import android.app.IntentService;
 import android.content.Intent;

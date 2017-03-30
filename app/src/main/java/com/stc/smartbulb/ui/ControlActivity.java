@@ -1,4 +1,4 @@
-package com.stc.smartbulb;
+package com.stc.smartbulb.ui;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+
+import com.stc.smartbulb.R;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

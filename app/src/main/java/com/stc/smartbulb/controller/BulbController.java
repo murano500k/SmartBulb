@@ -1,4 +1,4 @@
-package com.stc.smartbulb;
+package com.stc.smartbulb.controller;
 
 import android.os.Handler;
 import android.os.Message;

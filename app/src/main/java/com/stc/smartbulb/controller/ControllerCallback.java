@@ -1,4 +1,4 @@
-package com.stc.smartbulb;
+package com.stc.smartbulb.controller;
 
 /**
  * Created by artem on 3/29/17.

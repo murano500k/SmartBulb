@@ -9,6 +9,7 @@ import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.stc.smartbulb.controller.BulbSwitchService;
 import com.stc.smartbulb.utils.PrefsUtils;
 
 public class WifiReceiver extends BroadcastReceiver {

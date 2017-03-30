@@ -1,0 +1,35 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="@string/pref_key_device_ip"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_device_ip"/>
+    <EditTextPreference
+        android:key="@string/pref_key_device_mac"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_device_mac"/>
+    <EditTextPreference
+        android:key="@string/pref_key_device_type"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_device_type"/>
+    <EditTextPreference
+        android:key="@string/pref_key_device_port"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_device_port"/>
+    <EditTextPreference
+        android:key="@string/pref_key_device_name"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_device_name"/>
+
+
+</PreferenceScreen>

@@ -1,4 +1,4 @@
-package com.stc.smartbulb;
+package com.stc.smartbulb.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.stc.smartbulb.R;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
