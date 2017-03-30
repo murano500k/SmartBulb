@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_geofenceDetectionProviders_entries">
+        <item>Google Play Location</item>
+        <item>Google Play Geofence</item>
+    </string-array>
+    <string-array name="pref_geofenceDetectionProviders_values">
+        <item>@string/pref_geofenceDetectionProviders_gp_location</item>
+        <item>@string/pref_geofenceDetectionProviders_gp_geofence</item>
+    </string-array>
+</resources>

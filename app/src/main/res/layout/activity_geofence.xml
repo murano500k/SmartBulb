@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="10">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.stc.smartbulb.geofence.GeofenceMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:context="com.ashaevy.geofence.MainActivity"
+        android:layout_weight="4"/>
+
+    <fragment
+        android:id="@+id/controls"
+        android:name="com.stc.smartbulb.geofence.ControlsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"/>
+
+</LinearLayout>
