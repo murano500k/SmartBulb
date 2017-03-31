@@ -2,6 +2,7 @@ package com.stc.smartbulb.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.stc.smartbulb.R;
+import com.stc.smartbulb.controller.NetworkChangeReceiver;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -29,6 +31,8 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "APITEST";
@@ -109,7 +113,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        getApplicationContext().registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
     }
+    private final NetworkChangeReceiver receiver = new NetworkChangeReceiver();
+
     private Thread mSearchThread = null;
     private void searchDevice() {
 
