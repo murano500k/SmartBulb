@@ -7,10 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.text.TextUtils;
 import android.util.Log;
-
-import com.stc.smartbulb.utils.PrefsUtils;
 
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
@@ -31,9 +28,9 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
             final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
             if (connectionInfo != null) {
                 String ssid = connectionInfo.getSSID();
-                if (TextUtils.equals(ssid, PrefsUtils.getSavedNetworkSSID(context))) {
+               /* if (TextUtils.equals(ssid, PrefsUtils.getSavedNetworkSSID(context))) {
                     Log.d(TAG, "connected");
-                }
+                }*/
             }
         }
         Log.d(TAG, "not connected");

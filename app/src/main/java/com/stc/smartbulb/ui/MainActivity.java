@@ -12,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -54,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
     List<HashMap<String, String>> mDeviceList = new ArrayList<HashMap<String, String>>();
     private TextView mTextView;
     private Button mBtnSearch;
+    private boolean mNotify = true;
+    private MulticastLock multicastLock;
+    private final NetworkChangeReceiver receiver = new NetworkChangeReceiver();
+    private Thread mSearchThread = null;
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -76,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private MulticastLock multicastLock;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +122,23 @@ public class MainActivity extends AppCompatActivity {
         });
         getApplicationContext().registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
     }
-    private final NetworkChangeReceiver receiver = new NetworkChangeReceiver();
 
-    private Thread mSearchThread = null;
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        if(item.getItemId()==R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            Log.d(TAG, "onOptionsItemSelected: settings");
+            return true;
+        }
+        return false;
+    }
     private void searchDevice() {
-
         mDeviceList.clear();
         mAdapter.notifyDataSetChanged();
         mSeraching = true;
@@ -177,7 +196,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private boolean mNotify = true;
     @Override
     protected void onResume() {
         super.onResume();
@@ -185,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    //DatagramSocket socket = new DatagramSocket(UDP_PORT);
                     InetAddress group = InetAddress.getByName(UDP_HOST);
                     MulticastSocket socket = new MulticastSocket(UDP_PORT);
                     socket.setLoopbackMode(true);

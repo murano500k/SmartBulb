@@ -1,11 +1,9 @@
 package com.stc.smartbulb.controller;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
-
-import com.stc.smartbulb.utils.PrefsUtils;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -27,9 +25,9 @@ public class BulbSwitchService extends IntentService implements ControllerCallba
 
     public BulbSwitchService() {
         super("BulbSwitchService");
-        controller=new BulbController(PrefsUtils.getSavedBulbIP(getApplicationContext()),
+        /*controller=new BulbController(PrefsUtils.getSavedBulbIP(getApplicationContext()),
                 PrefsUtils.getSavedBulbPort(getApplicationContext()),
-                this);
+                this);*/
 
     }
 
@@ -55,9 +53,33 @@ public class BulbSwitchService extends IntentService implements ControllerCallba
         controller.switchBulb(param1);
     }
 
-    @Override
     public void onResult(boolean result, boolean val) {
         Log.d(TAG, "onResult: "+result);
         Log.d(TAG, "onVal: "+val);
+    }
+
+    @Override
+    public void deviceFound(final Device device) {
+
+    }
+
+    @Override
+    public void deviceNotFound() {
+
+    }
+
+    @Override
+    public void deviceConnectedSuccessfully(final Device device) {
+
+    }
+
+    @Override
+    public void deviceConnectFailed(final Device device) {
+
+    }
+
+    @Override
+    public void setController(final ControllerInterface controller) {
+
     }
 }

@@ -31,6 +31,8 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -151,8 +153,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_device_ip)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_device_port)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_device_mac)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_device_name)));
         }
 
         @Override
@@ -178,11 +182,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_trigger);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_trigger_wifi_ssid)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_trigger_wifi_enabled)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_trigger_time_turn_off_enabled)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_trigger_time_turn_off_when)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_trigger_time_turn_on_enabled)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_trigger_time_turn_on_when)));
+
         }
 
         @Override
@@ -195,4 +201,5 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }
+
 }

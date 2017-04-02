@@ -5,5 +5,12 @@ package com.stc.smartbulb.controller;
  */
 
 public interface ControllerCallback {
-    void onResult(boolean result, boolean val);
+    void deviceFound(Device device);
+    void deviceNotFound();
+    void deviceConnectedSuccessfully(Device device);
+    void deviceConnectFailed(Device device);
+
+
+
+    void setController(ControllerInterface controller);
 }

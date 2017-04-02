@@ -12,11 +12,18 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
         versionName "1.0"
+        jackOptions {
+            enabled true
+        }
 
 
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
     }
     buildTypes {
         buildTypes {
@@ -66,47 +73,21 @@ dependencies {
     compile "com.android.support.test.espresso:espresso-idling-resource:$rootProject.espressoVersion"
     compile "com.google.guava:guava:$rootProject.guavaVersion"
 
-    // Dependencies for local unit tests
+    testCompile "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+
+    testCompile 'com.android.support.test:runner:0.5'
+    testCompile 'com.android.support.test:rules:0.5'
+    testCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
     testCompile "junit:junit:$rootProject.ext.junitVersion"
     testCompile "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
     testCompile "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
 
-    // Android Testing Support Library's runner and rules
-    androidTestCompile("com.android.support.test:runner:$rootProject.ext.runnerVersion", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    androidTestCompile("com.android.support.test:rules:$rootProject.ext.runnerVersion", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-
-    // Dependencies for Android unit tests
-    androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
-    androidTestCompile "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
-
-    // Espresso UI Testing
-    androidTestCompile("com.android.support.test.espresso:espresso-core:$rootProject.espressoVersion", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    androidTestCompile("com.android.support.test.espresso:espresso-contrib:$rootProject.espressoVersion", {
-        // Necessary to avoid version conflicts
-        exclude group: 'com.android.support', module: 'appcompat-v7'
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude group: 'com.android.support', module: 'design'
-        exclude module: 'recyclerview-v7'
-    })
-    androidTestCompile("com.android.support.test.espresso:espresso-intents:$rootProject.espressoVersion", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-
-    androidTestCompile "com.android.support.test.uiautomator:uiautomator-v18:$rootProject.uiautomatorVersion"
 
 
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'com.android.support:support-v4:25.3.1'
-    compile 'com.android.support:support-vector-drawable:25.3.1'
     androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
+
 }
 
 
