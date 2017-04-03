@@ -7,6 +7,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.stc.smartbulb.model.Device;
+import com.stc.smartbulb.model.NetworkChangeReceiver;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

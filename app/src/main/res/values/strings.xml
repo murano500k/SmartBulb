@@ -164,7 +164,8 @@
     <string name="pref_title_trigger_time_turn_off_enabled">Turn off time trigger status</string>
     <string name="pref_title_trigger_wifi_ssid">Saved wifi ssid</string>
     <string name="pref_title_trigger_wifi_enabled">Wifi trigger status</string>
-
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="title_activity_detail">DetailActivity</string>
 
 
 </resources>

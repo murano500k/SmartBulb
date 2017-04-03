@@ -24,7 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.stc.smartbulb.R;
-import com.stc.smartbulb.controller.NetworkChangeReceiver;
+import com.stc.smartbulb.model.NetworkChangeReceiver;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

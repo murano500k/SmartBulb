@@ -1,4 +1,4 @@
-package com.stc.smartbulb.controller;
+package com.stc.smartbulb.model;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+
+import com.stc.smartbulb.controller.BulbSwitchService;
 
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
@@ -20,7 +22,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         if(isMyWifiConnected(context)) BulbSwitchService.startActionFoo(context, true);
     }
 
-    private boolean isMyWifiConnected(Context context) {
+    public static boolean isMyWifiConnected(Context context) {
         ConnectivityManager connec = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo wifi = connec.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (wifi.isConnected()) {

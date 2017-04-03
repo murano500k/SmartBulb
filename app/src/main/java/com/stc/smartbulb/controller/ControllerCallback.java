@@ -1,5 +1,7 @@
 package com.stc.smartbulb.controller;
 
+import com.stc.smartbulb.model.Device;
+
 /**
  * Created by artem on 3/29/17.
  */

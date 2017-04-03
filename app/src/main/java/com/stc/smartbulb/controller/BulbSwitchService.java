@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.stc.smartbulb.model.Device;
+
 import static com.google.android.gms.wearable.DataMap.TAG;
 
 /**

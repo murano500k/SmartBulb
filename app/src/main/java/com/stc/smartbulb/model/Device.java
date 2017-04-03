@@ -1,4 +1,4 @@
-package com.stc.smartbulb.controller;
+package com.stc.smartbulb.model;
 
 import android.content.Context;
 
@@ -18,7 +18,7 @@ public class Device {
     private String ssid;
     private static Device instance;
 
-    Device(final String ip, final String port, final String name, final String mac, final String ssid) {
+    public Device(final String ip, final String port, final String name, final String mac, final String ssid) {
         this.ip = ip;
         this.port = port;
         this.name = name;
@@ -30,43 +30,43 @@ public class Device {
         // TODO: 3/31/17 create
     }
 
-    String getIp() {
+    public String getIp() {
         return ip;
     }
 
-    void setIp(final String ip) {
+    public void setIp(final String ip) {
         this.ip = ip;
     }
 
-    String getPort() {
+    public String getPort() {
         return port;
     }
 
-    void setPort(final String port) {
+    public void setPort(final String port) {
         this.port = port;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
-    void setName(final String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    String getMac() {
+    public String getMac() {
         return mac;
     }
 
-    void setMac(final String mac) {
+    public void setMac(final String mac) {
         this.mac = mac;
     }
 
-    String getSsid() {
+    public String getSsid() {
         return ssid;
     }
 
-    void setSsid(final String ssid) {
+    public void setSsid(final String ssid) {
         this.ssid = ssid;
     }
 
@@ -88,4 +88,9 @@ public class Device {
         return instance;
     }
 
+    boolean getState() {
+        // TODO: 4/3/17  
+        return false;
+        
+    }
 }
