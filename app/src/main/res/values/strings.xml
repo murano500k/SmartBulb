@@ -166,6 +166,10 @@
     <string name="pref_title_trigger_wifi_enabled">Wifi trigger status</string>
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="title_activity_rx_test">RxTestActivity</string>
+    <string name="bulb_on">Light ON</string>
+    <string name="bulb_off">Light OFF</string>
+    <string name="connected">Device connected</string>
 
 
 </resources>

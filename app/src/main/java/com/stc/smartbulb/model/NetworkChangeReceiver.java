@@ -9,8 +9,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-import com.stc.smartbulb.controller.BulbSwitchService;
-
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
     private static final String TAG = "NetworkChangeReceiver";
@@ -19,7 +17,6 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         Log.d(TAG, "onReceive: "+isNetworkConnected(context));
-        if(isMyWifiConnected(context)) BulbSwitchService.startActionFoo(context, true);
     }
 
     public static boolean isMyWifiConnected(Context context) {
