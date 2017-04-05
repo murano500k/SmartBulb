@@ -171,6 +171,8 @@
     <string name="bulb_off">Light OFF</string>
     <string name="connected">Device connected</string>
     <string name="title_activity_rx2_test">Rx2TestActivity</string>
+    <string name="cmd_success">Command success!</string>
+    <string name="cmd_fail">Command failed</string>
 
 
 </resources>

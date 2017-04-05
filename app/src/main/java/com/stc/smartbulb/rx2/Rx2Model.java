@@ -5,13 +5,9 @@ import android.util.Log;
 import com.stc.smartbulb.model.Device;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import io.reactivex.Completable;
-import io.reactivex.CompletableEmitter;
-import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -81,21 +77,6 @@ public class Rx2Model implements Rx2Contract.Presenter{
         }));
     }
 
-    private void readLogs(BufferedReader mReader) throws IOException {
-        Log.d(TAG, "readLogs: "+mReader.readLine());
-        mDisposable.add(Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(CompletableEmitter e)throws IOException{
-                e.setCancellable(mReader::close);
-                    while (!e.isDisposed() && mReader.ready()) {
-                        String line = mReader.readLine();
-                        Log.d("LOG_READER", ""+line);
-                    }
-                e.onComplete();
-            }
-        }).subscribeOn(Schedulers.newThread()).subscribe());
-    }
-
     @Override
     public void click(){
         if(mDevice==null) view.deviceLost("null");
@@ -111,7 +92,7 @@ public class Rx2Model implements Rx2Contract.Presenter{
                 if(mSocket.isConnected()) e.onSuccess(mSocket);
                 else e.onError(new Throwable("Socket not connected"));
             }
-        }).observeOn(Schedulers.newThread()).map(new Function<Socket, Socket>() {
+        }).subscribeOn(Schedulers.newThread()).observeOn(Schedulers.newThread()).map(new Function<Socket, Socket>() {
             @Override
             public Socket apply(Socket socket) throws Exception {
                 mDeviceManager.writeCmd(cmd , socket);
@@ -132,11 +113,12 @@ public class Rx2Model implements Rx2Contract.Presenter{
                     }
                 });
             }
-        }).subscribeOn(AndroidSchedulers.mainThread())
+        }).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String s) throws Exception {
                         Log.d(TAG, "new line: " + s);
+                        mDeviceManager.parseMsg(s, view, mDevice);
                     }
                 }, Throwable::printStackTrace, new Action() {
                     @Override

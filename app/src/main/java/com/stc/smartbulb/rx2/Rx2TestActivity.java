@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
@@ -68,6 +69,7 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
 
     @Override
     public void deviceReady(Device device) {
+        progress.setVisibility(View.GONE);
         mFabToggle.setVisibility(View.VISIBLE);
         mFabConnect.setVisibility(View.GONE);
         mTextDeviceInfo.setText(device.toString());
@@ -75,6 +77,7 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
 
     @Override
     public void deviceLost(String errorMsg) {
+        progress.setVisibility(View.GONE);
         mFabToggle.setVisibility(View.GONE);
         mFabConnect.setVisibility(View.VISIBLE);
         mTextDeviceInfo.setText(errorMsg);
@@ -82,6 +85,7 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
 
     @Override
     public void deviceNotFound(String message) {
+        progress.setVisibility(View.GONE);
         mFabToggle.setVisibility(View.GONE);
         mFabConnect.setVisibility(View.VISIBLE);
         mTextDeviceInfo.setText(message);
@@ -93,7 +97,16 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
                 mFabConnect.setVisibility(View.GONE);
                 break;
             case R.id.fabToggle:
+                progress.setVisibility(View.VISIBLE);
                 mPresenter.click();
         }
+    }
+
+    @Override
+    public void onResult(boolean val) {
+        if(val)Log.d(TAG, "onResult");
+        else Log.e(TAG, "onResult: " );
+        Toast.makeText(this, val ? getString(R.string.cmd_success): getString(R.string.cmd_fail), Toast.LENGTH_SHORT).show();
+        progress.setVisibility(View.GONE);
     }
 }

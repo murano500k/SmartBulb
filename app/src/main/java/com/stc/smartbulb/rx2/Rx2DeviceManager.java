@@ -17,7 +17,7 @@ import java.util.HashMap;
  */
 
 public class Rx2DeviceManager {
-    private static final String TAG = "Rx2Model";
+    private static final String TAG = "Rx2DeviceManager";
     private static final String UDP_HOST = "239.255.255.250";
     private static final int UDP_PORT = 1982;
     private static final String message = "M-SEARCH * HTTP/1.1\r\n" +
@@ -26,13 +26,16 @@ public class Rx2DeviceManager {
             "ST:wifi_bulb\r\n";
     private static final String CMD_ON = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"on\",\"smooth\",500]}\r\n" ;
     private static final String CMD_OFF = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"off\",\"smooth\",500]}\r\n" ;
+    private static final String CMD_TOGGLE = "{\"id\":%id,\"method\":\"toggle\",\"params\":[]}\r\n" ;
 
     private DatagramSocket dSocket;
+    private int mCmdId;
 
     public void writeCmd(boolean cmdB, Socket socket) throws IOException {
-        Log.d(TAG, "writeCmd: "+cmdB);
         BufferedOutputStream bos =new BufferedOutputStream(socket.getOutputStream());
-        String cmd = cmdB ? CMD_ON : CMD_OFF;
+        String cmdTemplate = cmdB ? CMD_ON : CMD_OFF;
+        String cmd = cmdTemplate.replace("%id", String.valueOf(++mCmdId));
+        Log.d(TAG, "writeCmd: "+cmd);
         bos.write(cmd.getBytes());
         bos.flush();
     }
@@ -83,5 +86,13 @@ public class Rx2DeviceManager {
 
     public void cancelSearch() {
         if(dSocket!=null && dSocket.isConnected()) dSocket.close();
+    }
+    public void parseMsg(String msg, Rx2Contract.View view, Device device) throws Exception{
+        if(msg.contains("id")){
+            view.onResult(msg.contains("ok"));
+        }else if(msg.contains("power")) {
+            device.setTurnedOn(msg.contains("on"));
+            view.deviceReady(device);
+        }
     }
 }
