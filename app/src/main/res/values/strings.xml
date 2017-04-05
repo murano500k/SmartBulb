@@ -175,6 +175,7 @@
     <string name="cmd_fail">Command failed</string>
     <string name="qs_dialog_cancel">Cancel</string>
     <string name="qs_dialog_select">Select</string>
+    <string name="qs_dialog_tile_label">Select WIFI</string>
 
 
 </resources>

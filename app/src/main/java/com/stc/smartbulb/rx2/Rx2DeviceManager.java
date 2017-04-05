@@ -97,7 +97,7 @@ public class Rx2DeviceManager {
             view.onResult(msg.contains("ok"));
         }else if(msg.contains("power")) {
             device.setTurnedOn(msg.contains("on"));
-            view.onUpdate(device);
+            view.onUpdate(device, null);
         }
     }
 }

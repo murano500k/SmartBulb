@@ -10,7 +10,7 @@ import android.util.Log;
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
 import com.stc.smartbulb.rx2.Rx2Contract;
-import com.stc.smartbulb.rx2.Rx2Model;
+import com.stc.smartbulb.rx2.Rx2Presenter;
 
 @TargetApi(Build.VERSION_CODES.N)
 public class QstService extends TileService implements Rx2Contract.View{
@@ -18,7 +18,7 @@ public class QstService extends TileService implements Rx2Contract.View{
     private static final String TAG = "QstService";
     public QstService() {
         super();
-        new Rx2Model(this);
+        new Rx2Presenter(this);
     }
 
     @Override
@@ -97,20 +97,9 @@ public class QstService extends TileService implements Rx2Contract.View{
     }
 
     @Override
-    public void deviceReady(Device device) {
+    public void onUpdate(Device device, String msg) {
         if(device==null) newState(Tile.STATE_UNAVAILABLE);
         else newState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
-    }
-
-    @Override
-    public void deviceLost(String errorMsg) {
-        newState(Tile.STATE_UNAVAILABLE);
-        Log.e(TAG, "deviceLost: "+errorMsg );
-    }
-
-    @Override
-    public void deviceNotFound(String message) {
-        Log.e(TAG, "deviceNotFound: "+message );
     }
 
     @Override
