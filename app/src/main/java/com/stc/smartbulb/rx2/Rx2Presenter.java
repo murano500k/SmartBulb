@@ -14,107 +14,89 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 import static io.reactivex.Single.create;
 
 /**
- * Created by artem on 4/4/17.
+ * Created by artem on 4/5/17.
  */
 
-public class Rx2Presenter implements Rx2Contract.Presenter{
+public class Rx2Presenter {
     private Rx2DeviceManager mDeviceManager;
     private Device mDevice;
     private Socket mSocket;
-    private Rx2Contract.View view;
-    private CompositeDisposable mDisposable;
-
 
     private static final String TAG = "Rx2Presenter";
-    public Rx2Presenter(Rx2Contract.View view) {
+    public Rx2Presenter() {
         this.mDeviceManager = new Rx2DeviceManager();
-        this.view = view;
-        mDisposable = new CompositeDisposable();
-        view.setPresenter(this);
+    }
+    public Observable<Device> sendToggleCmdObservable() {
+        return sendCmd(funcToggle());
+    }
+    public Observable<Device> getStateObservable() {
+        return sendCmd(funcGetState());
     }
 
-    @Override
-    public void finish() {
-        Log.i(TAG, "finish: ");
-        mDisposable.dispose();
-        mDevice=null;
-        view.onUpdate(mDevice, "onFinish");
+    public Observable<Device> sendPowerCmdObservable(boolean val) {
+        return sendCmd(funcPower(val));
     }
-
-    @Override
-    public boolean isRunning() {
-        return mDisposable!=null && !mDisposable.isDisposed() && mDisposable.size()>0;
+    private Single<Device> deviceObservable(){
+        if(mDevice==null) return create((SingleOnSubscribe<Device>) e -> {
+            e.setCancellable(() -> mDeviceManager.cancelSearch());
+            e.onSuccess(mDeviceManager.searchDevice());
+        }).timeout(2, TimeUnit.SECONDS, observer -> observer.onError(new Throwable("timeout, device not found")));
+        else return Single.just(mDevice);
     }
-
-    @Override
-    public void start() {
-        Log.i(TAG, "start: ");
-        mDisposable.add(
-                create((SingleOnSubscribe<Device>) e -> {
-                    e.setCancellable(() -> {
-                        mDeviceManager.cancelSearch();
-                    });
-                    if(mDevice==null) mDevice=mDeviceManager.searchDevice();
-                    e.onSuccess(mDevice);
-                })
-                .timeout(2, TimeUnit.SECONDS, observer -> {
-                    observer.onError(new Throwable("timeout, device not found"));
-                })
+    private Single<Socket> socketObservable() {
+        if (mSocket == null || mSocket.isClosed()) return deviceObservable().map(device -> {
+            mDevice=device;
+            mSocket = mDeviceManager.connectToDevice(mDevice);
+            return mSocket;
+        });
+        else return Single.just(mSocket);
+    }
+    private Observable<Device> sendCmd(Function<Socket,Socket> cmd) {
+        return socketObservable()
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(device -> view.onUpdate(device, null), throwable -> {
-                    mDevice=null;
-                    throwable.printStackTrace();
-                    view.onUpdate(mDevice, throwable.getMessage());
-                }));
+                .observeOn(Schedulers.io())
+                .map(cmd)
+                .flatMapObservable(new Function<Socket, ObservableSource<String>>() { // readLogs
+                    @Override
+                    public ObservableSource<String> apply(Socket socket) throws Exception {
+                        return Observable.create(e -> {
+                            BufferedReader mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                            while (mSocket != null && mSocket.isConnected()) {
+                                if (mBos.ready()) e.onNext(mBos.readLine());
+                            }
+                            e.onComplete();
+                        });
+                    }
+                }).map(s -> mDeviceManager.parseMsg(s, mDevice));
     }
 
-    @Override
-    public void click(){
-        if(mDevice==null) view.onUpdate(null,"no device");
-        else sendCmd(!mDevice.isTurnedOn());
+
+    private Function<Socket, Socket> funcGetState() {
+        return socket -> {  //send command
+            Log.d(TAG, "funcGetState: "+socket);
+            return socket;
+        };
     }
-    public void sendCmd(boolean cmd){
-        mDisposable.add(
-                Single.create((SingleOnSubscribe<Socket>) e -> { // connect
-                    if(mSocket==null || mSocket.isClosed()) mSocket = mDeviceManager.connectToDevice(mDevice);
-                    if(mSocket.isConnected()) e.onSuccess(mSocket);
-                    else e.onError(new Throwable("Socket not connected"));
-                })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(Schedulers.newThread())
-                .map(socket -> {  //send command
-                    mDeviceManager.writeCmd(cmd , socket);
-                    return socket;
-                })
-                .flatMapObservable(new Function<Socket, ObservableSource<String>>() { // readLogs
-                        @Override
-                        public ObservableSource<String> apply(Socket socket) throws Exception {
-                            return Observable.create(e -> {
-                                BufferedReader mBos= new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-                                while (mSocket!=null && mSocket.isConnected()){
-                                    if(mBos.ready())e.onNext(mBos.readLine());
-                                }
-                                e.onComplete();
-                            });
-                        }
-                })
-                .observeOn(AndroidSchedulers.mainThread())  //show result
-                .subscribe(
-                        s -> { //next
-                            Log.d(TAG, "new line: " + s);
-                            mDeviceManager.parseMsg(s, view, mDevice);
-                        },
-                        Throwable::printStackTrace, //error
-                        () -> view.onUpdate(mDevice, null)) //complete
-        );
+
+
+    Function<Socket,Socket> funcToggle(){
+        Log.d(TAG, "funcToggle: ");
+        return socket -> {  //send command
+            mDeviceManager.writeCmd(!mDevice.isTurnedOn(), socket);
+            return socket;
+        };
+    }
+    Function<Socket,Socket> funcPower(boolean val){
+        Log.d(TAG, "funcPower: "+val);
+        return socket -> {  //send command
+            mDeviceManager.writeCmd(val, socket);
+            return socket;
+        };
     }
 }

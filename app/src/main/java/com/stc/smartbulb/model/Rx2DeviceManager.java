@@ -2,8 +2,6 @@ package com.stc.smartbulb.model;
 
 import android.util.Log;
 
-import com.stc.smartbulb.rx2.Rx2Contract;
-
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -91,12 +89,8 @@ public class Rx2DeviceManager {
     public void cancelSearch() {
         if(dSocket!=null && dSocket.isConnected()) dSocket.close();
     }
-    public void parseMsg(String msg, Rx2Contract.View view, Device device) throws Exception{
-        if(msg.contains("id")){
-            view.onResult(msg.contains("ok"));
-        }else if(msg.contains("power")) {
-            device.setTurnedOn(msg.contains("on"));
-            view.onUpdate(device, null);
-        }
+    public Device parseMsg(String msg, Device device) throws Exception{
+        if(msg.contains("power")) device.setTurnedOn(msg.contains("on"));
+        return device;
     }
 }

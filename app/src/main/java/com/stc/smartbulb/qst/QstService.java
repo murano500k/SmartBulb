@@ -2,9 +2,6 @@ package com.stc.smartbulb.qst;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.service.quicksettings.Tile;
@@ -13,20 +10,24 @@ import android.util.Log;
 
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
-import com.stc.smartbulb.model.NetworkChangeReceiver;
-import com.stc.smartbulb.rx2.Rx2Contract;
 import com.stc.smartbulb.rx2.Rx2Presenter;
 
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 @TargetApi(Build.VERSION_CODES.N)
-public class QstService extends TileService implements Rx2Contract.View{
-    private Rx2Contract.Presenter mPresenter;
+public class QstService extends TileService {
+    private Rx2Presenter mPresenter;
     private static final String TAG = "QstService";
-    private BroadcastReceiver receiver;
+    private BroadcastReceiver mReceiver;
+
+    private CompositeDisposable mDisposables;
     public QstService() {
         super();
-        new Rx2Presenter(this);
+        mPresenter= new Rx2Presenter();
+        mDisposables = new CompositeDisposable();
     }
 
     @Override
@@ -43,83 +44,65 @@ public class QstService extends TileService implements Rx2Contract.View{
 
     @Override
     public void onStartListening() {
-        Log.d(TAG, "onStartListening: running="+mPresenter.isRunning());
-        if(!mPresenter.isRunning()){
-            mPresenter.start();
-        }
+        Log.d(TAG, "onStartListening: ");
+        mDisposables.add(
+                mPresenter.getStateObservable()
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                device -> newState(device, null),
+                                throwable -> newState(null, throwable.getMessage())
+                        ));
+
     }
 
     @Override
     public void onStopListening() {
         super.onStopListening();
         Log.d(TAG, "onStopListening: ");
-        //dontListenWifiChanges();
+        if(mDisposables!=null && !mDisposables.isDisposed()) mDisposables.dispose();
     }
+
     @Override
     public void onClick() {
-        if(getQsTile().getState()==Tile.STATE_UNAVAILABLE) {
-            Log.w(TAG, "onClick: search");
-            if(mPresenter!=null) mPresenter.finish();
-            new Rx2Presenter(this);
-        }else {
-            Log.w(TAG, "onClick: command" );
-            mPresenter.click();
+        super.onClick();
+        switch (getQsTile().getState()){
+            case Tile.STATE_UNAVAILABLE:
+                subscribe(mPresenter.getStateObservable());
+                break;
+            case Tile.STATE_ACTIVE:
+                subscribe(mPresenter.sendPowerCmdObservable(false));
+                break;
+            case Tile.STATE_INACTIVE:
+                subscribe(mPresenter.sendPowerCmdObservable(true));
+                break;
+
         }
+    }
+
+    private void subscribe(Observable<Device> observable){
+        mDisposables.add(
+                observable
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                device -> newState(device, null),
+                                throwable -> newState(null, throwable.getMessage())
+                        ));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
-        mPresenter.finish();
-    }
-    @Override
-    public void setPresenter(Rx2Contract.Presenter presenter) {
-        this.mPresenter = presenter;
     }
 
-    @Override
-    public void onUpdate(Device device, String msg) {
-        Log.d(TAG, "onUpdateDevice: "+device);
-        Log.d(TAG, "onUpdateMsg: "+msg);
-        if(device==null) {
-            newState(Tile.STATE_UNAVAILABLE);
-            //listenWifiChanges();
-        } else {
-            newState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
-            //dontListenWifiChanges();
-        }
-    }
 
-    @Override
-    public void onResult(boolean val) {
-        if(val)Log.d(TAG, "onResult");
-        else Log.e(TAG, "onResult");
+    private void newState(Device device, String msg) {
+        if(device==null) newTileState(Tile.STATE_UNAVAILABLE);
+        else newTileState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE );
     }
-    private void listenWifiChanges(){
-        Log.d(TAG, "listenWifiChanges");
-        if(receiver==null) {
-            receiver= new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String ssid = NetworkChangeReceiver.getConnectedWifiSsid(context);
-                    Log.d(TAG, "onReceive ssid="+ssid);
-                    //if(ssid!=null && mPresenter!=null) mPresenter.start();
-                }
-            };
-            registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
-        }
-
-    }
-    private void dontListenWifiChanges(){
-        Log.d(TAG, "dontListenWifiChanges");
-        if(receiver!=null) {
-            unregisterReceiver(receiver);
-            receiver=null;
-        }
-    }
-
-    private Tile newState(int state){
+    private Tile newTileState(int state){
         Tile tile = getQsTile();
         switch (state){
             case Tile.STATE_ACTIVE:

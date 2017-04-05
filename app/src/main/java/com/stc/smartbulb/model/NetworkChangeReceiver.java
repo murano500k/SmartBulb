@@ -38,3 +38,22 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
     }
 
 }
+/*private void listenWifiChanges(){
+        Log.d(TAG, "listenWifiChanges");
+        if(mReceiver ==null) mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String ssid = NetworkChangeReceiver.getConnectedWifiSsid(context);
+                Log.d(TAG, "onReceive ssid="+ssid);
+                //if(ssid!=null && mPresenter!=null) mPresenter.start();
+            }
+        };
+        registerReceiver(mReceiver, new IntentFilter(CONNECTIVITY_ACTION));
+    }
+    private void dontListenWifiChanges(){
+        Log.d(TAG, "dontListenWifiChanges");
+        if(mReceiver !=null) {
+            unregisterReceiver(mReceiver);
+            mReceiver =null;
+        }
+    }*/
