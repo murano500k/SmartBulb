@@ -44,7 +44,7 @@
 
         </service>
 
-        <receiver android:name=".model.NetworkChangeReceiver">
+        <receiver android:name=".qst.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.ConnectivityManager.CONNECTIVITY_ACTION" />
             </intent-filter>
@@ -57,11 +57,6 @@
             android:name=".details.DetailActivity"
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name=".ui.RxTestActivity"
-            android:label="@string/title_activity_rx_test"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
         <activity
             android:name=".rx2.Rx2TestActivity"
             android:label="@string/title_activity_rx2_test"

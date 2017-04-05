@@ -173,6 +173,8 @@
     <string name="title_activity_rx2_test">Rx2TestActivity</string>
     <string name="cmd_success">Command success!</string>
     <string name="cmd_fail">Command failed</string>
+    <string name="qs_dialog_cancel">Cancel</string>
+    <string name="qs_dialog_select">Select</string>
 
 
 </resources>

@@ -74,6 +74,11 @@ public class Rx2DeviceManager {
             String title = str.substring(0, index);
             String value = str.substring(index + 1);
             bulbInfo.put(title, value);
+            Log.d(TAG, "bulbinfo:{");
+            for(String key : bulbInfo.keySet()){
+                Log.d(TAG, key+" : "+bulbInfo.get(key));
+            }
+            Log.d(TAG, "}");
         }
         return !bulbInfo.isEmpty() ? new Device(bulbInfo) : null;
     }
@@ -92,7 +97,7 @@ public class Rx2DeviceManager {
             view.onResult(msg.contains("ok"));
         }else if(msg.contains("power")) {
             device.setTurnedOn(msg.contains("on"));
-            view.deviceReady(device);
+            view.onUpdate(device);
         }
     }
 }

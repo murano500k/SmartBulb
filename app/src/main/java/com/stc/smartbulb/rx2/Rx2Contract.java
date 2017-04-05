@@ -9,9 +9,7 @@ import com.stc.smartbulb.model.Device;
 public interface Rx2Contract {
     interface View{
         void setPresenter(Presenter presenter);
-        void deviceReady(Device device);
-        void deviceLost(String errorMsg);
-        void deviceNotFound(String message);
+        void onUpdate(Device device, String errorMsg);
         void onResult(boolean val);
     }
     interface Presenter{

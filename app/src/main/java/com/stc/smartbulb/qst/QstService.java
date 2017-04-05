@@ -3,6 +3,7 @@ package com.stc.smartbulb.qst;
 import android.annotation.TargetApi;
 import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.os.Bundle;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
@@ -10,7 +11,7 @@ import android.util.Log;
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
 import com.stc.smartbulb.rx2.Rx2Contract;
-import com.stc.smartbulb.rx2.Rx2Model;
+import com.stc.smartbulb.rx2.Rx2Presenter;
 
 @TargetApi(Build.VERSION_CODES.N)
 public class QstService extends TileService implements Rx2Contract.View{
@@ -18,13 +19,14 @@ public class QstService extends TileService implements Rx2Contract.View{
     private static final String TAG = "QstService";
     public QstService() {
         super();
-        new Rx2Model(this);
+        new Rx2Presenter(this);
     }
 
     @Override
     public void onTileAdded() {
         super.onTileAdded();
         Log.d(TAG, "onTileAdded: ");
+
     }
 
     @Override
@@ -97,28 +99,49 @@ public class QstService extends TileService implements Rx2Contract.View{
     }
 
     @Override
-    public void deviceReady(Device device) {
+    public void onUpdate(Device device, String errorMsg) {
         if(device==null) newState(Tile.STATE_UNAVAILABLE);
         else newState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
-    }
-
-    @Override
-    public void deviceLost(String errorMsg) {
-        newState(Tile.STATE_UNAVAILABLE);
-        Log.e(TAG, "deviceLost: "+errorMsg );
-    }
-
-    @Override
-    public void deviceNotFound(String message) {
-        Log.e(TAG, "deviceNotFound: "+message );
     }
 
     @Override
     public void onResult(boolean val) {
         if(val)Log.d(TAG, "onResult");
         else Log.e(TAG, "onResult: " );
+    }
 
-        //Toast.makeText(this, val ? getString(R.string.cmd_success): getString(R.string.cmd_fail), Toast.LENGTH_SHORT).show();
+    private void showDialog(){
+        com.google.android_quick_settings.QSDialog.Builder dialogBuilder =
+                new com.google.android_quick_settings.QSDialog.Builder(getApplicationContext());
+
+        com.google.android_quick_settings.QSDialog dialog = dialogBuilder
+                .setClickListener(new com.google.android_quick_settings.QSDialog.QSDialogListener() {
+
+                    @Override
+                    public void onDialogPositiveClick(DialogFragment dialog) {
+                        Log.d("QS", "Positive registed");
+
+                        // The user wants to change the tile state.
+                        isTileActive = !isTileActive;
+                        updateTile();
+                    }
+
+                    @Override
+                    public void onDialogNegativeClick(DialogFragment dialog) {
+                        Log.d("QS", "Negative registered");
+
+                        // The user is cancelled the dialog box.
+                        // We can't do anything to the dialog box here,
+                        // but we can do any cleanup work.
+                    }
+                })
+                .create();
+
+        // Pass the tile's current state to the dialog.
+        Bundle args = new Bundle();
+        args.putBoolean(com.google.android_quick_settings.QSDialog.TILE_STATE_KEY, isTileActive);
+
+        this.showDialog(dialog.onCreateDialog(args));
     }
 }
 

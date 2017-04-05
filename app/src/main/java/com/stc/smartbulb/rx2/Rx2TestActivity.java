@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
-import com.stc.smartbulb.model.NetworkChangeReceiver;
+import com.stc.smartbulb.qst.NetworkChangeReceiver;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 
@@ -51,7 +51,7 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
         mFabToggle = (FloatingActionButton) findViewById(R.id.fabToggle);
         mTextDeviceInfo = (TextView) findViewById(R.id.text_device_info);
         registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
-        new Rx2Model(this);
+        new Rx2Presenter(this);
     }
 
     @Override
@@ -68,32 +68,23 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
     }
 
     @Override
-    public void deviceReady(Device device) {
+    public void onUpdate(Device device, String errorMsg) {
         progress.setVisibility(View.GONE);
-        mFabToggle.setVisibility(View.VISIBLE);
-        mFabConnect.setVisibility(View.GONE);
-        mTextDeviceInfo.setText(device.toString());
+        if(device==null){
+            mFabToggle.setVisibility(View.GONE);
+            mFabConnect.setVisibility(View.VISIBLE);
+            mTextDeviceInfo.setText(errorMsg);
+        }else {
+            mFabToggle.setVisibility(View.VISIBLE);
+            mFabConnect.setVisibility(View.GONE);
+            mTextDeviceInfo.setText(device.toString());
+        }
     }
 
-    @Override
-    public void deviceLost(String errorMsg) {
-        progress.setVisibility(View.GONE);
-        mFabToggle.setVisibility(View.GONE);
-        mFabConnect.setVisibility(View.VISIBLE);
-        mTextDeviceInfo.setText(errorMsg);
-    }
-
-    @Override
-    public void deviceNotFound(String message) {
-        progress.setVisibility(View.GONE);
-        mFabToggle.setVisibility(View.GONE);
-        mFabConnect.setVisibility(View.VISIBLE);
-        mTextDeviceInfo.setText(message);
-    }
     public void onClick(View view){
         switch (view.getId()){
             case R.id.fabConnect:
-                new Rx2Model(this);
+                new Rx2Presenter(this);
                 mFabConnect.setVisibility(View.GONE);
                 break;
             case R.id.fabToggle:
@@ -107,6 +98,5 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
         if(val)Log.d(TAG, "onResult");
         else Log.e(TAG, "onResult: " );
         Toast.makeText(this, val ? getString(R.string.cmd_success): getString(R.string.cmd_fail), Toast.LENGTH_SHORT).show();
-        progress.setVisibility(View.GONE);
     }
 }
