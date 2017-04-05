@@ -25,14 +25,6 @@ public class QstService extends TileService implements Rx2Contract.View{
     private BroadcastReceiver receiver;
     public QstService() {
         super();
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String ssid = NetworkChangeReceiver.getConnectedWifiSsid(context);
-                Log.d(TAG, "onReceive ssid="+ssid);
-                //if(ssid!=null && mPresenter!=null) mPresenter.start();
-            }
-        };
         new Rx2Presenter(this);
     }
 
@@ -51,15 +43,15 @@ public class QstService extends TileService implements Rx2Contract.View{
     @Override
     public void onStartListening() {
         Log.d(TAG, "onStartListening: ");
-
+        mPresenter.start();
     }
 
     @Override
     public void onStopListening() {
         super.onStopListening();
         Log.d(TAG, "onStopListening: ");
+        dontListenWifiChanges();
         if(mPresenter!=null)mPresenter.finish();
-        unregisterReceiver(receiver);
     }
     @Override
     public void onClick() {
@@ -116,16 +108,13 @@ public class QstService extends TileService implements Rx2Contract.View{
     @Override
     public void setPresenter(Rx2Contract.Presenter presenter) {
         this.mPresenter = presenter;
-        if (mPresenter != null) {
-            mPresenter.start();
-        }
     }
 
     @Override
     public void onUpdate(Device device, String msg) {
         if(device==null) {
             newState(Tile.STATE_UNAVAILABLE);
-            registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
+            listenWifiChanges();
         } else {
             newState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
         }
@@ -135,6 +124,25 @@ public class QstService extends TileService implements Rx2Contract.View{
     public void onResult(boolean val) {
         if(val)Log.d(TAG, "onResult");
         else Log.e(TAG, "onResult");
+    }
+    private void listenWifiChanges(){
+        Log.d(TAG, "listenWifiChanges");
+        if(receiver==null) receiver= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String ssid = NetworkChangeReceiver.getConnectedWifiSsid(context);
+                Log.d(TAG, "onReceive ssid="+ssid);
+                //if(ssid!=null && mPresenter!=null) mPresenter.start();
+            }
+        };
+        registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
+    }
+    private void dontListenWifiChanges(){
+        Log.d(TAG, "dontListenWifiChanges");
+        if(receiver!=null) {
+            unregisterReceiver(receiver);
+            receiver=null;
+        }
     }
 }
 
