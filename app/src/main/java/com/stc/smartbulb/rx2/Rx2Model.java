@@ -111,7 +111,7 @@ public class Rx2Model implements Rx2Contract.Presenter{
                 if(mSocket.isConnected()) e.onSuccess(mSocket);
                 else e.onError(new Throwable("Socket not connected"));
             }
-        }).observeOn(Schedulers.newThread()).map(new Function<Socket, Socket>() {
+        }).subscribeOn(Schedulers.newThread()).observeOn(Schedulers.newThread()).map(new Function<Socket, Socket>() {
             @Override
             public Socket apply(Socket socket) throws Exception {
                 mDeviceManager.writeCmd(cmd , socket);
@@ -132,11 +132,12 @@ public class Rx2Model implements Rx2Contract.Presenter{
                     }
                 });
             }
-        }).subscribeOn(AndroidSchedulers.mainThread())
+        }).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String s) throws Exception {
                         Log.d(TAG, "new line: " + s);
+                        mDeviceManager.parseMsg(s, view, mDevice);
                     }
                 }, Throwable::printStackTrace, new Action() {
                     @Override

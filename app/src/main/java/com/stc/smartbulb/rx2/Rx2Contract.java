@@ -12,6 +12,7 @@ public interface Rx2Contract {
         void deviceReady(Device device);
         void deviceLost(String errorMsg);
         void deviceNotFound(String message);
+        void onResult(boolean val);
     }
     interface Presenter{
         void start();
