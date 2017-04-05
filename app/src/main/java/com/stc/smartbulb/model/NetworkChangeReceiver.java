@@ -1,4 +1,4 @@
-package com.stc.smartbulb.qst;
+package com.stc.smartbulb.model;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

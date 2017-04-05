@@ -3,6 +3,7 @@ package com.stc.smartbulb.rx2;
 import android.util.Log;
 
 import com.stc.smartbulb.model.Device;
+import com.stc.smartbulb.model.Rx2DeviceManager;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -46,7 +47,11 @@ public class Rx2Presenter implements Rx2Contract.Presenter{
         mDisposable.dispose();
         mDevice=null;
         view.onUpdate(mDevice, "onFinish");
-        view.setPresenter(null);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return mDisposable!=null && !mDisposable.isDisposed() && mDisposable.size()>0;
     }
 
     @Override

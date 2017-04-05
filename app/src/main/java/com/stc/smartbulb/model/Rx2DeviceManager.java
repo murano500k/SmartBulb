@@ -1,8 +1,8 @@
-package com.stc.smartbulb.rx2;
+package com.stc.smartbulb.model;
 
 import android.util.Log;
 
-import com.stc.smartbulb.model.Device;
+import com.stc.smartbulb.rx2.Rx2Contract;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -41,9 +41,8 @@ public class Rx2DeviceManager {
     }
 
     public Device searchDevice() throws Exception {
-        cancelSearch();
         Log.d(TAG, "getSearchDeviceObservable");
-        dSocket = new DatagramSocket();
+        if(dSocket==null || dSocket.isClosed()) dSocket = new DatagramSocket();
         DatagramPacket dpSend = new DatagramPacket(message.getBytes(),
                 message.getBytes().length, InetAddress.getByName(UDP_HOST),
                 UDP_PORT);

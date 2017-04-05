@@ -16,5 +16,6 @@ public interface Rx2Contract {
         void start();
         void finish();
         void click();
+        boolean isRunning();
     }
 }

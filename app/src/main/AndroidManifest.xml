@@ -26,12 +26,6 @@
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".ui.ControlActivity" />
 
-        <receiver android:name=".WifiReceiver">
-            <intent-filter android:priority="100">
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-            </intent-filter>
-        </receiver>
-
         <service
             android:name=".qst.QstService"
             android:icon="@drawable/ic_lightbulb_on"
@@ -40,11 +34,9 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
-
-
         </service>
 
-        <receiver android:name=".qst.NetworkChangeReceiver">
+        <receiver android:name=".model.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.ConnectivityManager.CONNECTIVITY_ACTION" />
             </intent-filter>
@@ -53,10 +45,6 @@
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
-        <activity
-            android:name=".details.DetailActivity"
-            android:label="@string/title_activity_detail"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".rx2.Rx2TestActivity"
             android:label="@string/title_activity_rx2_test"
