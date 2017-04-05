@@ -131,7 +131,7 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="multi_select_list_preference_default_value"/>
+    <string-array name="multi_select_list_preference_default_value" />
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
 
@@ -170,6 +170,7 @@
     <string name="bulb_on">Light ON</string>
     <string name="bulb_off">Light OFF</string>
     <string name="connected">Device connected</string>
+    <string name="title_activity_rx2_test">Rx2TestActivity</string>
 
 
 </resources>

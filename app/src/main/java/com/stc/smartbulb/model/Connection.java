@@ -1,6 +1,7 @@
 package com.stc.smartbulb.model;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.net.Socket;
 
 /**
@@ -11,11 +12,17 @@ public class Connection {
     private Socket mSocket;
     private BufferedOutputStream mBos;
     private Device mDevice;
-    public Connection(Socket socket, BufferedOutputStream bos, Device device) {
+    private BufferedReader mBis;
+
+    public BufferedReader getBis() {
+        return mBis;
+    }
+
+    public Connection(Socket socket, BufferedOutputStream bos, BufferedReader bis, Device device) {
         mSocket = socket;
         mBos = bos;
         mDevice=device;
-
+        mBis = bis;
     }
 
     public Socket getSocket() {

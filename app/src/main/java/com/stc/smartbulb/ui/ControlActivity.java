@@ -18,7 +18,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.schedulers.Schedulers;
 

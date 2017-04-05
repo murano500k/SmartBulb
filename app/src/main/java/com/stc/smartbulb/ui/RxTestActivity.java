@@ -19,10 +19,11 @@ import com.stc.smartbulb.model.Device;
 import com.stc.smartbulb.model.NetworkChangeReceiver;
 import com.stc.smartbulb.model.RxModel;
 
-import java.util.concurrent.TimeUnit;
-
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.view.View.GONE;
@@ -52,6 +53,8 @@ public class RxTestActivity extends AppCompatActivity {
     };
     private Observable<Connection> connectionObservable;
     private ProgressBar progress;
+    private Disposable connectionDisposable;
+    private PublishSubject<Boolean> connectionSubject;
 
 
     @Override
@@ -61,12 +64,11 @@ public class RxTestActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         progress = (ProgressBar)findViewById(R.id.progress);
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab = (FloatingActionButton) findViewById(R.id.fabConnect);
         mTextDeviceInfo = (TextView) findViewById(R.id.text_device_info);
         mTextDeviceStatus = (TextView) findViewById(R.id.text_device_status);
         mTextDeviceConnected = (TextView) findViewById(R.id.text_device_connected);
         mRxModel = new RxModel();
-        setConnectionStatus(false);
         setDeviceStatus(null);
     }
 
@@ -74,8 +76,12 @@ public class RxTestActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         getApplicationContext().registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
-        if(connectionObservable==null) connectionObservable = mRxModel.connect();
+        if(connectionSubject==null || !connectionSubject.hasObservers()) {
+            connectionSubject=mRxModel.connect();
+            setDeviceStatus(null);
+        }else {
 
+        }
     }
 
     @Override
@@ -83,39 +89,59 @@ public class RxTestActivity extends AppCompatActivity {
         super.onStop();
         getApplicationContext().unregisterReceiver(receiver);
     }
-    private void setConnectionStatus(boolean status){
-        mTextDeviceConnected.setText(status ? getString(R.string.connected) : getString(R.string.not_connected));
-        if(!status) setDeviceStatus(null);
-        setLoading(false);
-    }
+
 
     private void setDeviceStatus(Device device){
+
+        setLoading(false);
         if(device==null) {
+            mTextDeviceConnected.setText(getString(R.string.not_connected));
             mTextDeviceInfo.setText("");
             mTextDeviceStatus.setText("");
             mFab.setImageResource(R.drawable.ic_lightbulb_not_available);
             mConnectionStatus=false;
             return;
         }
-        mConnectionStatus=false;
+        mConnectionStatus=true;
         mDeviceStatus=device.isTurnedOn();
         mTextDeviceInfo.setText(device.toString());
         mTextDeviceStatus.setText(device.isTurnedOn()? getString(R.string.bulb_on) : getString(R.string.bulb_off));
         mFab.setImageResource(device.isTurnedOn() ? R.drawable.ic_lightbulb_on : R.drawable.ic_lightbulb_off);
-        setLoading(false);
+        connectionSubject = mRxModel.connect();
+
     }
 
     public void onClick(View v){
         Log.d(TAG, "onClick: ");
         setLoading(true);
-        if(!mConnectionStatus) {
-            Log.w(TAG, "onClick: is null" );
-            connectionObservable = mRxModel.connect();
-            connectionObservable.timeout(2, TimeUnit.SECONDS).subscribe(deviceInfoConsumer(), connectionErrorConsumer());
+        if(connectionDisposable==null || connectionDisposable.isDisposed()) {
+            Log.w(TAG, "onClick: no connection. connecting..." );
+            connectionObservable.subscribe(deviceInfoConsumer(), connectionErrorConsumer());
+            connectionDisposable=connectionObservable.subscribeOn(Schedulers.io()).subscribe(logReadConsumer());
+            PublishSubject<Boolean> publishSubject = PublishSubject.create();
+
+            publishSubject.subscribe(new Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean aBoolean) throws Exception {
+                    Connection connection;
+                }
+            });
         }else {
             Log.w(TAG, "onClick: isnot null" );
-            connectionObservable.subscribe(sendCmdConsumer(!mDeviceStatus), connectionErrorConsumer());
+            connectionDisposable.dispose();
+            connectionDisposable=connectionObservable.subscribe(sendCmdConsumer(!mDeviceStatus), connectionErrorConsumer());
         }
+    }
+    private Consumer<Connection> logReadConsumer(){
+        return new Consumer<Connection>() {
+            @Override
+            public void accept(Connection connection) throws Exception {
+                while (connection.getBis()!=null && connection.getSocket().isConnected() && connection.getBis().ready()) {
+                    Log.d(TAG, "msg from device: " +connection.getBis().readLine());
+                }
+
+            }
+        };
     }
 
     private Consumer<Connection> sendCmdConsumer(boolean cmd){
@@ -125,9 +151,8 @@ public class RxTestActivity extends AppCompatActivity {
                 Log.d(TAG, "accept: "+connection);
                 if(connection==null || connection.getDevice()==null ||
                         connection.getBos()==null || !connection.getSocket().isConnected()){
-                    setConnectionStatus(false);
+                    setDeviceStatus(null);
                 }else {
-                    setConnectionStatus(true);
                     setDeviceStatus(connection.getDevice());
                     mRxModel.sendCmd(cmd, connection).subscribe(new Consumer<Device>() {
                         @Override
@@ -146,7 +171,7 @@ public class RxTestActivity extends AppCompatActivity {
                 Log.d(TAG, "accept: "+connection);
                 if(connection==null || connection.getDevice()==null ||
                         connection.getBos()==null || !connection.getSocket().isConnected()){
-                    setConnectionStatus(false);
+                    setDeviceStatus(null);
                 }else {
                     setDeviceStatus(connection.getDevice());
                 }
@@ -158,12 +183,13 @@ public class RxTestActivity extends AppCompatActivity {
         return new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) throws Exception {
-                Log.e(TAG, "error", throwable);
+                Log.e(TAG, "error: "+throwable.getMessage());
 
                 runOnUiThread(new Runnable() {
                     @Override
-                    public void run() {
-                        setConnectionStatus(false);
+                    public void run()
+                    {
+                        setDeviceStatus(null);
                     }
                 });
             }
