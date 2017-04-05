@@ -7,6 +7,7 @@ import com.stc.smartbulb.model.Device;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -14,7 +15,6 @@ import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -46,27 +46,30 @@ public class Rx2Presenter implements Rx2Contract.Presenter{
         mDisposable.dispose();
         mDevice=null;
         view.onUpdate(mDevice, "onFinish");
+        view.setPresenter(null);
     }
 
     @Override
     public void start() {
         Log.i(TAG, "start: ");
-        mDisposable.add(create((SingleOnSubscribe<Device>) e -> {
-            e.setCancellable(() -> {
-                mDeviceManager.cancelSearch();
-            });
-            mDevice=mDeviceManager.searchDevice();
-            e.onSuccess(mDevice);
-        })
-                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Device>() {
-            @Override
-            public void accept(Device device) throws Exception {
-                view.onUpdate(device, null);
-            }
-        }, throwable -> {
-            throwable.printStackTrace();
-                    view.onUpdate(null, throwable.getMessage());
-        }));
+        mDisposable.add(
+                create((SingleOnSubscribe<Device>) e -> {
+                    e.setCancellable(() -> {
+                        mDeviceManager.cancelSearch();
+                    });
+                    if(mDevice==null) mDevice=mDeviceManager.searchDevice();
+                    e.onSuccess(mDevice);
+                })
+                .timeout(2, TimeUnit.SECONDS, observer -> {
+                    observer.onError(new Throwable("timeout, device not found"));
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(device -> view.onUpdate(device, null), throwable -> {
+                    mDevice=null;
+                    throwable.printStackTrace();
+                    view.onUpdate(mDevice, throwable.getMessage());
+                }));
     }
 
     @Override

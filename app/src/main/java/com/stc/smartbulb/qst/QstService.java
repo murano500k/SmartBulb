@@ -1,6 +1,10 @@
 package com.stc.smartbulb.qst;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.service.quicksettings.Tile;
@@ -12,12 +16,23 @@ import com.stc.smartbulb.model.Device;
 import com.stc.smartbulb.rx2.Rx2Contract;
 import com.stc.smartbulb.rx2.Rx2Presenter;
 
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+
 @TargetApi(Build.VERSION_CODES.N)
 public class QstService extends TileService implements Rx2Contract.View{
     private Rx2Contract.Presenter mPresenter;
     private static final String TAG = "QstService";
+    private BroadcastReceiver receiver;
     public QstService() {
         super();
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String ssid = NetworkChangeReceiver.getConnectedWifiSsid(context);
+                Log.d(TAG, "onReceive ssid="+ssid);
+                //if(ssid!=null && mPresenter!=null) mPresenter.start();
+            }
+        };
         new Rx2Presenter(this);
     }
 
@@ -36,7 +51,7 @@ public class QstService extends TileService implements Rx2Contract.View{
     @Override
     public void onStartListening() {
         Log.d(TAG, "onStartListening: ");
-        mPresenter.start();
+
     }
 
     @Override
@@ -44,11 +59,18 @@ public class QstService extends TileService implements Rx2Contract.View{
         super.onStopListening();
         Log.d(TAG, "onStopListening: ");
         if(mPresenter!=null)mPresenter.finish();
+        unregisterReceiver(receiver);
     }
     @Override
     public void onClick() {
-        Log.d(TAG, "onClick: ");
-        if(mPresenter!=null) mPresenter.click();
+        if(getQsTile().getState()==Tile.STATE_UNAVAILABLE) {
+            Log.w(TAG, "onClick: search");
+            if(mPresenter!=null) mPresenter.finish();
+            new Rx2Presenter(this);
+        }else {
+            Log.w(TAG, "onClick: command" );
+            mPresenter.click();
+        }
     }
 
     @Override
@@ -94,20 +116,25 @@ public class QstService extends TileService implements Rx2Contract.View{
     @Override
     public void setPresenter(Rx2Contract.Presenter presenter) {
         this.mPresenter = presenter;
+        if (mPresenter != null) {
+            mPresenter.start();
+        }
     }
 
     @Override
     public void onUpdate(Device device, String msg) {
-        if(device==null) newState(Tile.STATE_UNAVAILABLE);
-        else newState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
+        if(device==null) {
+            newState(Tile.STATE_UNAVAILABLE);
+            registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
+        } else {
+            newState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
+        }
     }
 
     @Override
     public void onResult(boolean val) {
         if(val)Log.d(TAG, "onResult");
-        else Log.e(TAG, "onResult: " );
-
-        //Toast.makeText(this, val ? getString(R.string.cmd_success): getString(R.string.cmd_fail), Toast.LENGTH_SHORT).show();
+        else Log.e(TAG, "onResult");
     }
 }
 

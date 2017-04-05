@@ -19,21 +19,17 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         Log.d(TAG, "onReceive: "+isNetworkConnected(context));
     }
 
-    public static boolean isMyWifiConnected(Context context) {
+    public static String getConnectedWifiSsid(Context context) {
         ConnectivityManager connec = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo wifi = connec.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (wifi.isConnected()) {
             final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
             if (connectionInfo != null) {
-                String ssid = connectionInfo.getSSID();
-               /* if (TextUtils.equals(ssid, PrefsUtils.getSavedNetworkSSID(context))) {
-                    Log.d(TAG, "connected");
-                }*/
+                return connectionInfo.getSSID();
             }
         }
-        Log.d(TAG, "not connected");
-        return false;
+        return null;
     }
     private boolean isNetworkConnected(Context context) {
         ConnectivityManager connec = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

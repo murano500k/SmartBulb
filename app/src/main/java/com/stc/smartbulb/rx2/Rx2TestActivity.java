@@ -25,32 +25,30 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
     private Rx2Contract.Presenter mPresenter;
     private FloatingActionButton mFabConnect;
     private TextView mTextDeviceInfo;
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(NetworkChangeReceiver.isMyWifiConnected(context)) {
-                Log.d(TAG, "onReceive: is connected");
-                //onClick(mFabConnect);
-            }
-        }
-    };
+
 
     private ProgressBar progress;
     private FloatingActionButton mFabToggle;
-
+    private BroadcastReceiver receiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rx2_test);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         progress = (ProgressBar)findViewById(R.id.progress);
         progress.setVisibility(View.GONE);
         mFabConnect = (FloatingActionButton) findViewById(R.id.fabConnect);
         mFabToggle = (FloatingActionButton) findViewById(R.id.fabToggle);
         mTextDeviceInfo = (TextView) findViewById(R.id.text_device_info);
-        registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String ssid = NetworkChangeReceiver.getConnectedWifiSsid(context);
+                Log.d(TAG, "onReceive ssid="+ssid);
+                //if(ssid!=null && mPresenter!=null) mPresenter.start();
+            }
+        };
         new Rx2Presenter(this);
     }
 
@@ -64,17 +62,21 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
     @Override
     public void setPresenter(Rx2Contract.Presenter presenter) {
         this.mPresenter=presenter;
-        presenter.start();
+        if(mPresenter!=null) mPresenter.start();
     }
 
     @Override
     public void onUpdate(Device device, String errorMsg) {
+        Log.d(TAG, "onUpdateDevice: "+device);
+        Log.d(TAG, "onUpdateMsg: "+errorMsg);
         progress.setVisibility(View.GONE);
         if(device==null){
             mFabToggle.setVisibility(View.GONE);
             mFabConnect.setVisibility(View.VISIBLE);
             mTextDeviceInfo.setText(errorMsg);
+            registerReceiver(receiver, new IntentFilter(CONNECTIVITY_ACTION));
         }else {
+            unregisterReceiver(receiver);
             mFabToggle.setVisibility(View.VISIBLE);
             mFabConnect.setVisibility(View.GONE);
             mTextDeviceInfo.setText(device.toString());
@@ -88,9 +90,10 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2Contract.Vi
                 mFabConnect.setVisibility(View.GONE);
                 break;
             case R.id.fabToggle:
-                progress.setVisibility(View.VISIBLE);
+                mFabToggle.setVisibility(View.GONE);
                 mPresenter.click();
         }
+        progress.setVisibility(View.VISIBLE);
     }
 
     @Override
