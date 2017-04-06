@@ -2,6 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
 
+    signingConfigs {
+        config {
+            keyAlias 'irp2release'
+            keyPassword 'irpandroid'
+            storeFile file('/home/artem/projects/keystoreForMyApps/irp.jks')
+            storePassword 'irpandroid'
+        }
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
@@ -10,7 +18,7 @@ android {
         applicationId "com.stc.smartbulb"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
+        versionCode 3
         versionName "1.0"
         jackOptions {
             enabled true
@@ -20,39 +28,39 @@ android {
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_8
-            targetCompatibility JavaVersion.VERSION_1_8
-        }
+
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         debug {
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
     compile "com.android.support:support-v4:$rootProject.supportLibraryVersion"
     compile "com.android.support:preference-v14:$rootProject.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.supportLibraryVersion"
     compile "com.android.support.constraint:constraint-layout:$rootProject.constraintLayoutVersion"
-
     testCompile "com.android.support.test.espresso:espresso-idling-resource:$rootProject.espressoVersion"
-
     testCompile "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
-
     testCompile "junit:junit:$rootProject.ext.junitVersion"
     compile 'io.reactivex.rxjava2:rxjava:2.0.8'
-
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.firebase:firebase-core:10.0.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
 }
 
 
@@ -62,3 +70,6 @@ dependencies {
 
 
 
+
+
+apply plugin: 'com.google.gms.google-services'

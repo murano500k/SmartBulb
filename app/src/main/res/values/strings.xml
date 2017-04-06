@@ -12,11 +12,11 @@
 
     <!-- Validation -->
 
-    <string name="tile_name">Bulb</string>
+    <string name="tile_name">SmartBulb</string>
     <string name="not_available">Not available</string>
     <string name="tile_content_description">Lightbulb</string>
-    <string name="tile_off">Off</string>
-    <string name="tile_on">On</string>
+    <string name="tile_off">Light off</string>
+    <string name="tile_on">Light off</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
@@ -46,6 +46,16 @@
     <string name="title_set_wifi">Set  bulb wifi</string>
     <string name="wifi_not_connected">Wifi not connected. Please connct to your bulb wifi to continue</string>
     <string name="bulb_control">Light bulb conrol</string>
+    <string name="add_widget">add</string>
+    <string name="configure">configure</string>
+    <string name="qst_dialog_title">How to make it work?</string>
+    <string name="qst_dialog_text">1. You need a Yeelight smart bulb. \n2. Install official Yeelight app. \n3. Add your bulb to Yeelight app. (follow app instructions) \n4. Enable developer mode for your bulb in Yeelight app. (Open app -> Select bulb -> Bulb settings -> Developer mode -> Enable) \n5. Connect to same wifi with bulb and you are ready to go!</string>
+    <string name="dev_mode_is_enabled">Dev mode already enabled</string>
+    <string name="no_tile">Don\'t add tile</string>
+    <string name="store_base_url">https://play.google.com/store/apps/details?id=</string>
+    <string name="parent_app_package">com.yeelight.cherry</string>
+    <string name="open_parent_app">Open Yeelight app</string>
+    <string name="click_to_test">Click power to test bulb</string>
 
 
 </resources>
