@@ -1,11 +1,13 @@
 package com.stc.smartbulb.rx2;
 
-import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -13,19 +15,16 @@ import android.widget.TextView;
 
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
+import com.stc.smartbulb.model.NetworkChangeReceiver;
+import com.stc.smartbulb.model.Rx2DeviceManager;
+import com.stc.smartbulb.trigger.TriggerActivity;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
-
-public class Rx2TestActivity extends AppCompatActivity {
+public class Rx2TestActivity extends AppCompatActivity implements Rx2BulbContract.View {
     private static final String TAG = "Rx2TestActivity";
     private TextView mTextDeviceInfo;
     private ProgressBar mProgress;
     private FloatingActionButton mFabToggle;
-    private BroadcastReceiver mReceiver;
-    private Rx2Presenter mPresenter;
-    private CompositeDisposable mDisposables;
+    private Rx2BulbContract.Presenter mPresenter;
     private ImageView mImageBulb;
 
 
@@ -42,55 +41,56 @@ public class Rx2TestActivity extends AppCompatActivity {
         mFabToggle = (FloatingActionButton) findViewById(R.id.fabToggle);
         mFabToggle.setVisibility(View.VISIBLE);
         mTextDeviceInfo = (TextView) findViewById(R.id.text_device_info);
-        mDisposables= new CompositeDisposable();
-        mPresenter=new Rx2Presenter();
+        new Rx2Presenter(this);
         newState(null, "click to connect");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==R.id.action_settings) {
+            startActivity(new Intent(this, TriggerActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mDisposables!=null && !mDisposables.isDisposed()) mDisposables.dispose();
+        mPresenter.cancel();
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (isVoiceInteractionRoot()) {
-            onClick(null);
-            finish();
-        }
-
-    }
     public void onClick(View v){
         mProgress.setVisibility(View.VISIBLE);
         mFabToggle.setVisibility(View.GONE);
-        mDisposables.add(
-                mPresenter.sendToggleCmdObservable()
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                device -> newState(device, null),
-                                throwable -> newState(null, throwable.toString()+" : "+throwable.getMessage())
-                        ));
+        mPresenter.sendCmd(Rx2DeviceManager.CMD_TOGGLE, NetworkChangeReceiver.isMyNetworkConnected(this));
     }
-
-    private void newState(Device device, String  errorMsg) {
-        Log.d(TAG, "onUpdateDevice: "+device);
-        Log.d(TAG, "onUpdateMsg: "+errorMsg);
+    @Override
+    public void newState(Device device, String errorMsg) {
         if(device==null) {
-            mTextDeviceInfo.setText("error: "+errorMsg);
+            Log.e(TAG, "onUpdate msg: "+errorMsg);
+            mTextDeviceInfo.setText(errorMsg);
             mImageBulb.setImageResource(R.drawable.ic_lightbulb_not_available);
         }
         else {
             String info= String.format("device %s : %s", device.getIp(), device.isTurnedOn()? "on" : "off");
+            Log.d(TAG, "onUpdate Device: "+info);
             mImageBulb.setImageResource(device.isTurnedOn() ? R.drawable.ic_lightbulb_on : R.drawable.ic_lightbulb_off);
-
             mTextDeviceInfo.setText(info);
         }
         mProgress.setVisibility(View.GONE);
         mFabToggle.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void setPresenter(Rx2BulbContract.Presenter presenter) {
+        this.mPresenter=presenter;
     }
 
 

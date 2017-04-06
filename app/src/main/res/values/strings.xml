@@ -13,7 +13,7 @@
     <!-- Validation -->
 
     <string name="tile_name">Bulb</string>
-    <string name="tile_not_available">Not available</string>
+    <string name="not_available">Not available</string>
     <string name="tile_content_description">Lightbulb</string>
     <string name="tile_off">Off</string>
     <string name="tile_on">On</string>
@@ -26,14 +26,6 @@
     <!-- Example settings for Data & Sync -->
 
     <!-- Example settings for Notifications -->
-    <string name="pref_header_trigger">Trigger</string>
-    <string name="pref_header_device">Device</string>
-
-    <string name="pref_key_device_ip">pref_key_device_ip</string>
-    <string name="pref_key_device_mac">pref_key_device_mac</string>
-    <string name="pref_key_device_port">pref_key_device_port</string>
-    <string name="pref_key_device_type">pref_key_device_type</string>
-    <string name="pref_key_device_name">pref_key_device_name</string>
 
     <string name="pref_key_trigger_time_turn_on_when">pref_key_trigger_time_turn_on_when</string>
     <string name="pref_key_trigger_time_turn_off_when">pref_key_trigger_time_turn_off_when</string>
@@ -42,25 +34,18 @@
     <string name="pref_key_trigger_wifi_ssid">pref_key_trigger_wifi_ssid</string>
     <string name="pref_key_trigger_wifi_enabled">pref_key_trigger_wifi_enabled</string>
 
-    <string name="pref_title_device_ip">Device IP</string>
-    <string name="pref_title_device_mac">Device MAC</string>
-    <string name="pref_title_device_port">Device port</string>
-    <string name="pref_title_device_type">Device type</string>
-    <string name="pref_title_device_name">Device name</string>
-
     <string name="pref_title_trigger_time_turn_on_when">When to turn on</string>
     <string name="pref_title_trigger_time_turn_off_when">When to turn off</string>
     <string name="pref_title_trigger_time_turn_on_enabled">Turn on time trigger status</string>
     <string name="pref_title_trigger_time_turn_off_enabled">Turn off time trigger status</string>
     <string name="pref_title_trigger_wifi_ssid">Saved wifi ssid</string>
     <string name="pref_title_trigger_wifi_enabled">Wifi trigger status</string>
-    <string name="title_activity_detail">DetailActivity</string>
     <string name="title_activity_rx2_test">Rx2TestActivity</string>
-    <string name="cmd_success">Command success!</string>
-    <string name="cmd_fail">Command failed</string>
-    <string name="qs_dialog_cancel">Cancel</string>
-    <string name="qs_dialog_select">Select</string>
-    <string name="qs_dialog_tile_label">Select WIFI</string>
+    <string name="title_activity_trigger">TriggerActivity</string>
+    <string name="not_set">Not set</string>
+    <string name="title_set_wifi">Set  bulb wifi</string>
+    <string name="wifi_not_connected">Wifi not connected. Please connct to your bulb wifi to continue</string>
+    <string name="bulb_control">Light bulb conrol</string>
 
 
 </resources>

@@ -12,43 +12,33 @@ import com.stc.smartbulb.R;
 public class PrefsUtils {
 
 
-
-    public static String getSavedDeviceIP(Context c){
-        return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.pref_key_device_ip), null);
-    }
-    public static String getSavedDevicePort(Context c){
-        return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.pref_key_device_port), null);
-    }
-    public static String getSavedDeviceMac(Context c){
-        return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.pref_key_device_mac), null);
-    }
-    public static String getSavedDeviceName(Context c){
-        return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.pref_key_device_name), null);
-    }
     public static boolean getSavedTrggerWifiEnabled(Context c){
         return PreferenceManager.getDefaultSharedPreferences(c).getBoolean(c.getString(R.string.pref_key_trigger_wifi_enabled), false);
     }
-    public static String getSavedWifiSSID(Context c){
+    public static void saveTriggerEnabled(Context c, boolean val){
+        PreferenceManager.getDefaultSharedPreferences(c).edit().putBoolean(c.getString(R.string.pref_key_trigger_wifi_enabled), val).apply();
+    }
+    public static String getSavedWifiSsid(Context c){
         return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.pref_key_trigger_wifi_ssid), null);
     }
-
-
-    public static void saveDeviceIP(Context c, String val){
-        PreferenceManager.getDefaultSharedPreferences(c).edit().putString(c.getString(R.string.pref_key_device_ip), null).apply();
-    }
-    public static void saveDevicePort(Context c, String val){
-        PreferenceManager.getDefaultSharedPreferences(c).edit().putString(c.getString(R.string.pref_key_device_port), null).apply();
-    }
-    public static void saveDeviceMac(Context c, String val){
-        PreferenceManager.getDefaultSharedPreferences(c).edit().putString(c.getString(R.string.pref_key_device_mac), null).apply();
-    }
-    public static void saveDeviceName(Context c, String val){
-        PreferenceManager.getDefaultSharedPreferences(c).edit().putString(c.getString(R.string.pref_key_device_name), null).apply();
-    }
     public static void saveWifiSSID(Context c, String val){
-        PreferenceManager.getDefaultSharedPreferences(c).edit().putString(c.getString(R.string.pref_key_trigger_wifi_ssid), null).apply();
+        PreferenceManager.getDefaultSharedPreferences(c).edit().putString(c.getString(R.string.pref_key_trigger_wifi_ssid), val).apply();
+    }
+
+    public static long getSavedTimeOff(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.pref_key_trigger_time_turn_off_when), Long.MIN_VALUE);
+    }
+
+    public static void saveTimeOff(Context c, long val) {
+        PreferenceManager.getDefaultSharedPreferences(c).edit().putLong(c.getString(R.string.pref_key_trigger_time_turn_off_when), val).apply();
     }
 
 
+    public static long getSavedTimeOn(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.pref_key_trigger_time_turn_on_when), Long.MIN_VALUE);
+    }
 
+    public static void saveTimeOn(Context c, long val) {
+        PreferenceManager.getDefaultSharedPreferences(c).edit().putLong(c.getString(R.string.pref_key_trigger_time_turn_on_when), val).apply();
+    }
 }

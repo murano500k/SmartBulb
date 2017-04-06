@@ -1,131 +1,122 @@
 package com.stc.smartbulb.rx2;
 
-import android.util.Log;
-
 import com.stc.smartbulb.model.Device;
 import com.stc.smartbulb.model.Rx2DeviceManager;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Single;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.functions.Cancellable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-
-import static io.reactivex.Single.create;
 
 /**
  * Created by artem on 4/5/17.
  */
 
-public class Rx2Presenter {
+public class Rx2Presenter implements Rx2BulbContract.Presenter {
+    private static final String TAG = "Rx2Presenter";
+
     private Rx2DeviceManager mDeviceManager;
     private Device mDevice;
     private Socket mSocket;
-
-    private static final String TAG = "Rx2Presenter";
     private BufferedReader mBos;
+    private Rx2BulbContract.View mView;
+    private CompositeDisposable mDisposables;
 
-    public Rx2Presenter() {
+
+    public Rx2Presenter(Rx2BulbContract.View view) {
+        mView=view;
+        view.setPresenter(this);
         this.mDeviceManager = new Rx2DeviceManager();
-    }
-    public Observable<Device> sendToggleCmdObservable() {
-        return sendCmd(funcToggle());
-    }
-    public Observable<Device> getStateObservable() {
-        return sendCmd(funcGetState());
+        mDisposables=new CompositeDisposable();
     }
 
-    public Observable<Device> sendPowerCmdObservable(boolean val) {
-        return sendCmd(funcPower(val));
+    @Override
+    public void sendCmd(String cmd, boolean isConnected) {
+        Observable<Device> deviceObservable;
+
+        if (!isConnected) {
+
+            deviceObservable = Observable.error(new ConnectException("Wifi not connected"));
+
+        } else {
+
+            deviceObservable = Observable.just(cmd)
+
+                .distinct()
+                .take(1)
+
+                .zipWith(socketSingle().toObservable(), (s, socket) -> {
+                    if (socket == null || socket.isClosed()) throw new IOException("socket closed");
+                    mDeviceManager.writeCmd(s, socket);
+                    return socket;
+                })
+                    .flatMap(new Function<Socket, ObservableSource<String>>() {
+                    @Override
+                    public ObservableSource<String> apply(@NonNull Socket socket) throws Exception {
+                        return Observable.create(e -> {
+                            mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                            e.setCancellable(() -> {
+                                mSocket.close();
+                                mBos.close();
+                            });
+                            while (mSocket != null && mSocket.isConnected() && !mSocket.isClosed()) {
+                                if (mBos.ready()) e.onNext(mBos.readLine());
+                            }
+                        });
+                    }
+                })
+                    .map(s -> {
+                    if (mDevice == null) throw new NullPointerException("device null");
+                    return mDeviceManager.parseMsg(s, mDevice);
+                });
+        }
+
+        deviceObservable
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        device -> mView.newState(device, null),
+                        throwable -> mView.newState(null, throwable.getMessage())
+                );
     }
-    private Single<Device> deviceObservable(){
-        if(mDevice==null) return create((SingleOnSubscribe<Device>) e -> {
-            e.setCancellable(() -> mDeviceManager.cancelSearch());
-            mDevice=mDeviceManager.searchDevice();
-            e.onSuccess(mDevice);
-        }).timeout(2, TimeUnit.SECONDS, observer -> observer.onError(new Throwable("timeout, device not found")));
+
+
+    @Override
+    public void cancel() {
+        if(mDisposables !=null && !mDisposables.isDisposed()) mDisposables.dispose();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return !mDisposables.isDisposed();
+    }
+
+    private Single<Device> deviceSingleCallable(){
+        if(mDevice==null) {
+            return Single.fromCallable(() -> {
+                mDevice=mDeviceManager.searchDevice();
+                return mDevice;
+            })
+                    .timeout(2, TimeUnit.SECONDS, observer -> observer.onError(new Throwable("timeout, device not found")))
+                    .subscribeOn(Schedulers.newThread());
+        }
         else return Single.just(mDevice);
     }
-    private Single<Socket> socketObservable() {
-        if (mSocket == null || mSocket.isClosed()) return deviceObservable().map(device -> {
-            mDevice=device;
-            mSocket = mDeviceManager.connectToDevice(mDevice);
+    private Single<Socket> socketSingle() {
+        if (mSocket == null || mSocket.isClosed()) return deviceSingleCallable().map(device -> {
+            mSocket = mDeviceManager.connectToDevice(device);
             return mSocket;
         });
         else return Single.just(mSocket);
-    }
-    private Observable<Device> sendCmd(Function<Socket,Socket> cmd) {
-        return socketObservable()
-                .subscribeOn(Schedulers.newThread())
-                .map(cmd)
-                .flatMapObservable(new Function<Socket, ObservableSource<String>>() { // readLogs
-                    @Override
-                    public ObservableSource<String> apply(Socket socket) throws Exception {
-                        return Observable.create(e -> {
-                            mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-                            /*e.setDisposable(new Disposable() {
-                                @Override
-                                public void dispose() {
-                                    try {
-                                        mBos.close();
-                                        mSocket.close();
-                                    } catch (IOException e1) {
-                                        e1.printStackTrace();
-                                    }
-                                }
-
-                                @Override
-                                public boolean isDisposed() {
-                                    return !mSocket.isClosed() ;
-                                }
-                            });*/
-                            e.setCancellable(new Cancellable() {
-                                @Override
-                                public void cancel() throws Exception {
-                                    mSocket.close();
-                                    mBos.close();
-                                }
-                            });
-                                while (mSocket != null && mSocket.isConnected() && !mSocket.isClosed()) {
-                                    if (mBos.ready()) e.onNext(mBos.readLine());
-                                }
-
-                            e.onComplete();
-                        });
-                    }
-                }).map(s -> mDeviceManager.parseMsg(s, mDevice));
-    }
-
-
-    private Function<Socket, Socket> funcGetState() {
-        return socket -> {  //send command
-            Log.d(TAG, "funcGetState: "+socket);
-            Log.d(TAG, "funcGetState: "+mDevice);
-            mDeviceManager.writeCmd(Rx2DeviceManager.CMD_GET_PROP, socket);
-            return socket;
-        };
-    }
-
-
-    Function<Socket,Socket> funcToggle(){
-        Log.d(TAG, "funcToggle: ");
-        return socket -> {  //send command
-            mDeviceManager.writeCmd(Rx2DeviceManager.CMD_TOGGLE, socket);
-            return socket;
-        };
-    }
-    Function<Socket,Socket> funcPower(boolean val){
-        Log.d(TAG, "funcPower: "+val);
-        return socket -> {  //send command
-            mDeviceManager.writeCmd(val, socket);
-            return socket;
-        };
     }
 }
