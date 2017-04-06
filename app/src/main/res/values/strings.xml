@@ -13,7 +13,7 @@
     <!-- Validation -->
 
     <string name="tile_name">Bulb</string>
-    <string name="tile_not_available">Not available</string>
+    <string name="not_available">Not available</string>
     <string name="tile_content_description">Lightbulb</string>
     <string name="tile_off">Off</string>
     <string name="tile_on">On</string>
@@ -61,6 +61,14 @@
     <string name="qs_dialog_cancel">Cancel</string>
     <string name="qs_dialog_select">Select</string>
     <string name="qs_dialog_tile_label">Select WIFI</string>
+    <string name="title_activity_trigger">TriggerActivity</string>
+    <string name="not_set">Not set</string>
+    <string name="title_set_wifi">Set  bulb wifi</string>
+    <string name="wifi_not_connected">Wifi not connected. Please connct to your bulb wifi to continue</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
+    <string name="bulb_control">Light bulb conrol</string>
 
 
 </resources>

@@ -7,7 +7,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.text.TextUtils;
 import android.util.Log;
+
+import com.stc.smartbulb.utils.PrefsUtils;
 
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
@@ -26,10 +29,17 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
             final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
             if (connectionInfo != null) {
-                return connectionInfo.getSSID();
+                return connectionInfo.getSSID().replaceAll("\"", "");
             }
         }
         return null;
+    }
+
+    public static boolean isMyNetworkConnected(Context context){
+        String savedWifiSsid = PrefsUtils.getSavedWifiSsid(context);
+        if(savedWifiSsid==null)return false;
+        else if(TextUtils.equals(savedWifiSsid,getConnectedWifiSsid(context))) return true;
+        else return false;
     }
     private boolean isNetworkConnected(Context context) {
         ConnectivityManager connec = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

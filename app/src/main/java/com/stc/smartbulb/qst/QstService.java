@@ -1,7 +1,7 @@
 package com.stc.smartbulb.qst;
 
 import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.service.quicksettings.Tile;
@@ -10,29 +10,29 @@ import android.util.Log;
 
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.model.Device;
+import com.stc.smartbulb.model.NetworkChangeReceiver;
+import com.stc.smartbulb.rx2.Rx2BulbContract;
 import com.stc.smartbulb.rx2.Rx2Presenter;
+import com.stc.smartbulb.trigger.TriggerActivity;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
+import static com.stc.smartbulb.model.Rx2DeviceManager.CMD_GET_PROP;
+import static com.stc.smartbulb.model.Rx2DeviceManager.CMD_TOGGLE;
 
 @TargetApi(Build.VERSION_CODES.N)
-public class QstService extends TileService {
-    private Rx2Presenter mPresenter;
+public class QstService extends TileService implements Rx2BulbContract.View {
+    private Rx2BulbContract.Presenter mPresenter;
     private static final String TAG = "QstService";
-    private BroadcastReceiver mReceiver;
 
-    private CompositeDisposable mDisposables;
     public QstService() {
         super();
-        mPresenter= new Rx2Presenter();
-        mDisposables = new CompositeDisposable();
+        new Rx2Presenter(this);
     }
 
     @Override
     public void onTileAdded() {
         super.onTileAdded();
         Log.d(TAG, "onTileAdded: ");
+        startActivity(new Intent(this, TriggerActivity.class));
     }
 
     @Override
@@ -44,73 +44,61 @@ public class QstService extends TileService {
     @Override
     public void onStartListening() {
         Log.d(TAG, "onStartListening: ");
-        if(mDisposables.isDisposed())newTileState(Tile.STATE_UNAVAILABLE);
+        if(!mPresenter.isRunning())newTileState(Tile.STATE_UNAVAILABLE);
         if(getQsTile().getState()==Tile.STATE_UNAVAILABLE)onClick();
-       /* mDisposables.add(
-                mPresenter.getStateObservable()
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                device -> newState(device, null),
-                                throwable -> newState(null, throwable.getMessage())
-                        ));
-*/
     }
 
     @Override
     public void onStopListening() {
         super.onStopListening();
-        Log.d(TAG, "onStopListening: "+mDisposables.isDisposed());
-        if(!mDisposables.isDisposed()) mDisposables.dispose();
-
+        Log.d(TAG, "onStopListening: "+mPresenter.isRunning());
+        mPresenter.cancel();
     }
 
     @Override
     public void onClick() {
         super.onClick();
-        Log.d(TAG, "onClick: "+getQsTile().getState());
-        switch (getQsTile().getState()){
-            case Tile.STATE_UNAVAILABLE:
-                subscribe(mPresenter.getStateObservable());
-                break;
+
+        String cmd;
+        int state=getQsTile().getState();
+        Log.d(TAG, "onClick: "+state);
+
+        switch (state){
             case Tile.STATE_ACTIVE:
-                //subscribe(mPresenter.sendPowerCmdObservable(false));
-                subscribe(mPresenter.sendToggleCmdObservable());
+                cmd=CMD_TOGGLE;
                 break;
             case Tile.STATE_INACTIVE:
-                //subscribe(mPresenter.sendPowerCmdObservable(true));
-                subscribe(mPresenter.sendToggleCmdObservable());
+                cmd=CMD_TOGGLE;
                 break;
-
+            case Tile.STATE_UNAVAILABLE:
+            default:
+                cmd=CMD_GET_PROP;
+                break;
         }
-    }
 
-    private void subscribe(Observable<Device> observable){
-        mDisposables.add(
-                observable
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                device -> newState(device, null),
-                                throwable -> newState(null, throwable.getMessage()),
-                                () -> {
-                                    newTileState(Tile.STATE_UNAVAILABLE);
-                                }
-                        ));
+        mPresenter.sendCmd(cmd, NetworkChangeReceiver.isMyNetworkConnected(this));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: "+mDisposables.isDisposed());
-
+        Log.d(TAG, "onStopListening: "+mPresenter.isRunning());
+        mPresenter.cancel();
     }
 
-
-    private void newState(Device device, String msg) {
+    @Override
+    public void newState(Device device, String msg) {
         Log.d(TAG, "newState: "+msg);
         if(device==null) newTileState(Tile.STATE_UNAVAILABLE);
         else newTileState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE );
     }
+
+    @Override
+    public void setPresenter(Rx2BulbContract.Presenter presenter) {
+        this.mPresenter=presenter;
+
+    }
+
     private Tile newTileState(int state){
         Tile tile = getQsTile();
         switch (state){
@@ -136,7 +124,7 @@ public class QstService extends TileService {
             default:
                 tile.setIcon(Icon.createWithResource(this,
                         R.drawable.ic_lightbulb_not_available));
-                tile.setLabel(getString(R.string.tile_not_available));
+                tile.setLabel(getString(R.string.not_available));
                 tile.setContentDescription(
                         getString(R.string.tile_content_description));
                 tile.setState(Tile.STATE_UNAVAILABLE);
