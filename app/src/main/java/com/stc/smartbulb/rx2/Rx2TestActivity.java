@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -25,7 +26,7 @@ public class Rx2TestActivity extends AppCompatActivity {
     private BroadcastReceiver mReceiver;
     private Rx2Presenter mPresenter;
     private CompositeDisposable mDisposables;
-
+    private ImageView mImageBulb;
 
 
     @Override
@@ -34,6 +35,8 @@ public class Rx2TestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rx2_test);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mImageBulb=(ImageView)findViewById(R.id.image_status);
+        mImageBulb.setImageResource(R.drawable.ic_lightbulb_not_available);
         mProgress = (ProgressBar)findViewById(R.id.progress);
         mProgress.setVisibility(View.GONE);
         mFabToggle = (FloatingActionButton) findViewById(R.id.fabToggle);
@@ -69,16 +72,21 @@ public class Rx2TestActivity extends AppCompatActivity {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 device -> newState(device, null),
-                                throwable -> newState(null, throwable.getMessage())
+                                throwable -> newState(null, throwable.toString()+" : "+throwable.getMessage())
                         ));
     }
 
     private void newState(Device device, String  errorMsg) {
         Log.d(TAG, "onUpdateDevice: "+device);
         Log.d(TAG, "onUpdateMsg: "+errorMsg);
-        if(device==null) mTextDeviceInfo.setText("error: "+errorMsg);
+        if(device==null) {
+            mTextDeviceInfo.setText("error: "+errorMsg);
+            mImageBulb.setImageResource(R.drawable.ic_lightbulb_not_available);
+        }
         else {
             String info= String.format("device %s : %s", device.getIp(), device.isTurnedOn()? "on" : "off");
+            mImageBulb.setImageResource(device.isTurnedOn() ? R.drawable.ic_lightbulb_on : R.drawable.ic_lightbulb_off);
+
             mTextDeviceInfo.setText(info);
         }
         mProgress.setVisibility(View.GONE);

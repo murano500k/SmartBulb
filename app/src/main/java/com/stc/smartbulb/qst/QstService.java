@@ -15,7 +15,6 @@ import com.stc.smartbulb.rx2.Rx2Presenter;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 
 @TargetApi(Build.VERSION_CODES.N)
 public class QstService extends TileService {
@@ -45,7 +44,9 @@ public class QstService extends TileService {
     @Override
     public void onStartListening() {
         Log.d(TAG, "onStartListening: ");
-        mDisposables.add(
+        if(mDisposables.isDisposed())newTileState(Tile.STATE_UNAVAILABLE);
+        if(getQsTile().getState()==Tile.STATE_UNAVAILABLE)onClick();
+       /* mDisposables.add(
                 mPresenter.getStateObservable()
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -53,28 +54,32 @@ public class QstService extends TileService {
                                 device -> newState(device, null),
                                 throwable -> newState(null, throwable.getMessage())
                         ));
-
+*/
     }
 
     @Override
     public void onStopListening() {
         super.onStopListening();
-        Log.d(TAG, "onStopListening: ");
-        if(mDisposables!=null && !mDisposables.isDisposed()) mDisposables.dispose();
+        Log.d(TAG, "onStopListening: "+mDisposables.isDisposed());
+        if(!mDisposables.isDisposed()) mDisposables.dispose();
+
     }
 
     @Override
     public void onClick() {
         super.onClick();
+        Log.d(TAG, "onClick: "+getQsTile().getState());
         switch (getQsTile().getState()){
             case Tile.STATE_UNAVAILABLE:
                 subscribe(mPresenter.getStateObservable());
                 break;
             case Tile.STATE_ACTIVE:
-                subscribe(mPresenter.sendPowerCmdObservable(false));
+                //subscribe(mPresenter.sendPowerCmdObservable(false));
+                subscribe(mPresenter.sendToggleCmdObservable());
                 break;
             case Tile.STATE_INACTIVE:
-                subscribe(mPresenter.sendPowerCmdObservable(true));
+                //subscribe(mPresenter.sendPowerCmdObservable(true));
+                subscribe(mPresenter.sendToggleCmdObservable());
                 break;
 
         }
@@ -83,22 +88,26 @@ public class QstService extends TileService {
     private void subscribe(Observable<Device> observable){
         mDisposables.add(
                 observable
-                        .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 device -> newState(device, null),
-                                throwable -> newState(null, throwable.getMessage())
+                                throwable -> newState(null, throwable.getMessage()),
+                                () -> {
+                                    newTileState(Tile.STATE_UNAVAILABLE);
+                                }
                         ));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: ");
+        Log.d(TAG, "onDestroy: "+mDisposables.isDisposed());
+
     }
 
 
     private void newState(Device device, String msg) {
+        Log.d(TAG, "newState: "+msg);
         if(device==null) newTileState(Tile.STATE_UNAVAILABLE);
         else newTileState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE );
     }

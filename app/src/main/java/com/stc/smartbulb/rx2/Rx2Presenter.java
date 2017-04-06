@@ -14,6 +14,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
+import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -29,6 +30,8 @@ public class Rx2Presenter {
     private Socket mSocket;
 
     private static final String TAG = "Rx2Presenter";
+    private BufferedReader mBos;
+
     public Rx2Presenter() {
         this.mDeviceManager = new Rx2DeviceManager();
     }
@@ -45,7 +48,8 @@ public class Rx2Presenter {
     private Single<Device> deviceObservable(){
         if(mDevice==null) return create((SingleOnSubscribe<Device>) e -> {
             e.setCancellable(() -> mDeviceManager.cancelSearch());
-            e.onSuccess(mDeviceManager.searchDevice());
+            mDevice=mDeviceManager.searchDevice();
+            e.onSuccess(mDevice);
         }).timeout(2, TimeUnit.SECONDS, observer -> observer.onError(new Throwable("timeout, device not found")));
         else return Single.just(mDevice);
     }
@@ -59,17 +63,40 @@ public class Rx2Presenter {
     }
     private Observable<Device> sendCmd(Function<Socket,Socket> cmd) {
         return socketObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.newThread())
                 .map(cmd)
                 .flatMapObservable(new Function<Socket, ObservableSource<String>>() { // readLogs
                     @Override
                     public ObservableSource<String> apply(Socket socket) throws Exception {
                         return Observable.create(e -> {
-                            BufferedReader mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-                            while (mSocket != null && mSocket.isConnected()) {
-                                if (mBos.ready()) e.onNext(mBos.readLine());
-                            }
+                            mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                            /*e.setDisposable(new Disposable() {
+                                @Override
+                                public void dispose() {
+                                    try {
+                                        mBos.close();
+                                        mSocket.close();
+                                    } catch (IOException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public boolean isDisposed() {
+                                    return !mSocket.isClosed() ;
+                                }
+                            });*/
+                            e.setCancellable(new Cancellable() {
+                                @Override
+                                public void cancel() throws Exception {
+                                    mSocket.close();
+                                    mBos.close();
+                                }
+                            });
+                                while (mSocket != null && mSocket.isConnected() && !mSocket.isClosed()) {
+                                    if (mBos.ready()) e.onNext(mBos.readLine());
+                                }
+
                             e.onComplete();
                         });
                     }
@@ -80,6 +107,8 @@ public class Rx2Presenter {
     private Function<Socket, Socket> funcGetState() {
         return socket -> {  //send command
             Log.d(TAG, "funcGetState: "+socket);
+            Log.d(TAG, "funcGetState: "+mDevice);
+            mDeviceManager.writeCmd(Rx2DeviceManager.CMD_GET_PROP, socket);
             return socket;
         };
     }
@@ -88,7 +117,7 @@ public class Rx2Presenter {
     Function<Socket,Socket> funcToggle(){
         Log.d(TAG, "funcToggle: ");
         return socket -> {  //send command
-            mDeviceManager.writeCmd(!mDevice.isTurnedOn(), socket);
+            mDeviceManager.writeCmd(Rx2DeviceManager.CMD_TOGGLE, socket);
             return socket;
         };
     }

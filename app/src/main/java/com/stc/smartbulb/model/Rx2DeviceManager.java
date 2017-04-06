@@ -22,9 +22,11 @@ public class Rx2DeviceManager {
             "HOST:239.255.255.250:1982\r\n" +
             "MAN:\"ssdp:discover\"\r\n" +
             "ST:wifi_bulb\r\n";
-    private static final String CMD_ON = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"on\",\"smooth\",500]}\r\n" ;
-    private static final String CMD_OFF = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"off\",\"smooth\",500]}\r\n" ;
-    private static final String CMD_TOGGLE = "{\"id\":%id,\"method\":\"toggle\",\"params\":[]}\r\n" ;
+    public static final String CMD_ON = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"on\",\"smooth\",500]}\r\n" ;
+    public static final String CMD_OFF = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"off\",\"smooth\",500]}\r\n" ;
+    public static final String CMD_TOGGLE = "{\"id\":%id,\"method\":\"toggle\",\"params\":[]}\r\n" ;
+    public static final String CMD_GET_PROP = "{\"id\":%id,\"method\":\"get_prop\",\"params\":[\"power\"]}\r\n" ;
+
 
     private DatagramSocket dSocket;
     private int mCmdId;
@@ -32,6 +34,14 @@ public class Rx2DeviceManager {
     public void writeCmd(boolean cmdB, Socket socket) throws IOException {
         BufferedOutputStream bos =new BufferedOutputStream(socket.getOutputStream());
         String cmdTemplate = cmdB ? CMD_ON : CMD_OFF;
+        String cmd = cmdTemplate.replace("%id", String.valueOf(++mCmdId));
+        Log.d(TAG, "writeCmd: "+cmd);
+        bos.write(cmd.getBytes());
+        bos.flush();
+    }
+
+    public void writeCmd(String cmdTemplate , Socket socket) throws IOException {
+        BufferedOutputStream bos =new BufferedOutputStream(socket.getOutputStream());
         String cmd = cmdTemplate.replace("%id", String.valueOf(++mCmdId));
         Log.d(TAG, "writeCmd: "+cmd);
         bos.write(cmd.getBytes());
@@ -71,13 +81,16 @@ public class Rx2DeviceManager {
             String title = str.substring(0, index);
             String value = str.substring(index + 1);
             bulbInfo.put(title, value);
-            Log.d(TAG, "bulbinfo:{");
-            for(String key : bulbInfo.keySet()){
-                Log.d(TAG, key+" : "+bulbInfo.get(key));
-            }
-            Log.d(TAG, "}");
+
         }
-        return !bulbInfo.isEmpty() ? new Device(bulbInfo) : null;
+        Log.d(TAG, "bulbinfo:{");
+        for(String key : bulbInfo.keySet()){
+            Log.d(TAG, key+" : "+bulbInfo.get(key));
+        }
+        Log.d(TAG, "}");
+        if (!bulbInfo.isEmpty())
+        return new Device(bulbInfo);
+        throw new NullPointerException();
     }
     public Socket connectToDevice(Device device) throws IOException {
         Log.d(TAG, "connectToDevice: "+device.toString());
@@ -87,9 +100,10 @@ public class Rx2DeviceManager {
     }
 
     public void cancelSearch() {
-        if(dSocket!=null && dSocket.isConnected()) dSocket.close();
+        if(dSocket!=null && !dSocket.isClosed()) dSocket.close();
     }
     public Device parseMsg(String msg, Device device) throws Exception{
+        Log.d(TAG, "parseMsg: "+msg);
         if(msg.contains("power")) device.setTurnedOn(msg.contains("on"));
         return device;
     }
