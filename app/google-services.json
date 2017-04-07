@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "517705919444",
+    "firebase_url": "https://smartbulb-9f9ba.firebaseio.com",
+    "project_id": "smartbulb-9f9ba",
+    "storage_bucket": "smartbulb-9f9ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517705919444:android:e807f1ea22b75d1d",
+        "android_client_info": {
+          "package_name": "com.stc.smartbulb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "517705919444-uiem1th5h9o42okldcrmbn2k7pjmq3aq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.stc.smartbulb",
+            "certificate_hash": "b87bea89170c0477dbd5600fd0870943b5d33fad"
+          }
+        },
+        {
+          "client_id": "517705919444-l31mb6iore4n04ao2mdojtobrm9sp89g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwEEW5krCSDIDyhPEpoVj4mDj61XX9MM0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "517705919444-l31mb6iore4n04ao2mdojtobrm9sp89g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

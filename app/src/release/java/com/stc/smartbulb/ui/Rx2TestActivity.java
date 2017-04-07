@@ -8,10 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.stc.smartbulb.Device;
 import com.stc.smartbulb.R;
 import com.stc.smartbulb.Rx2BulbContract;
@@ -25,6 +27,7 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2BulbContrac
     private FloatingActionButton mFabToggle;
     private Rx2BulbContract.Presenter mPresenter;
     private ImageView mImageBulb;
+    private ImageButton mBtnParentApp;
 
 
     @Override
@@ -41,6 +44,9 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2BulbContrac
         mFabToggle = (FloatingActionButton) findViewById(R.id.fabToggle);
         mFabToggle.setVisibility(View.VISIBLE);
         mTextDeviceInfo = (TextView) findViewById(R.id.text_device_info);
+        mBtnParentApp = (ImageButton) findViewById(R.id.btn_parent_app);
+        Picasso.with(this).load(getString(R.string.parent_app_icon_url)).fit().into(mBtnParentApp);
+
         new Rx2Presenter(this);
         newState(null, getString(R.string.click_to_test));
     }
@@ -66,7 +72,7 @@ public class Rx2TestActivity extends AppCompatActivity implements Rx2BulbContrac
             mImageBulb.setImageResource(R.drawable.ic_lightbulb_not_available);
         }
         else {
-            String info= String.format("device %s : %s", device.getIp(), device.isTurnedOn()? "on" : "off");
+            String info= String.format("%s %s : %s", device.getName(), device.getIp(), device.isTurnedOn()? "on" : "off");
             Log.d(TAG, "onUpdate Device: "+info);
             mImageBulb.setImageResource(device.isTurnedOn() ? R.drawable.ic_lightbulb_on : R.drawable.ic_lightbulb_off);
             mTextDeviceInfo.setText(info);

@@ -18,7 +18,7 @@ android {
         applicationId "com.stc.smartbulb"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
+        versionCode 7
         versionName "1.0"
         jackOptions {
             enabled true
@@ -61,6 +61,8 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.firebase:firebase-core:10.0.1'
     compile 'com.android.support:cardview-v7:25.3.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
 }
 
 

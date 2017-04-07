@@ -47,7 +47,7 @@ public class QstService extends TileService implements Rx2BulbContract.View {
     public void onStartListening() {
         Log.d(TAG, "onStartListening: ");
 
-        if(!mPresenter.isRunning())newTileState(Tile.STATE_UNAVAILABLE);
+        if(!mPresenter.isRunning())newTileState(Tile.STATE_UNAVAILABLE, "Searching...");
         if(getQsTile().getState()==Tile.STATE_UNAVAILABLE)onClick();
     }
 
@@ -79,7 +79,7 @@ public class QstService extends TileService implements Rx2BulbContract.View {
                 break;
         }
 
-        mPresenter.sendCmd(cmd, true/*NetworkChangeReceiver.isMyNetworkConnected(this)*/);
+        mPresenter.sendCmd(cmd, NetworkChangeReceiver.isWifiConnected(this));
     }
 
     @Override
@@ -93,8 +93,11 @@ public class QstService extends TileService implements Rx2BulbContract.View {
     public void newState(Device device, String msg) {
         Log.d(TAG, "newState: msg="+msg);
         Log.d(TAG, "newState: device="+device);
-        if(device==null) newTileState(Tile.STATE_UNAVAILABLE);
-        else newTileState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE );
+        if(device==null) newTileState(Tile.STATE_UNAVAILABLE, msg);
+        else {
+            String info= String.format("%s %s", device.getName(), device.isTurnedOn()? "on" : "off");
+            newTileState(device.isTurnedOn() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE ,info);
+        }
     }
 
     @Override
@@ -103,13 +106,13 @@ public class QstService extends TileService implements Rx2BulbContract.View {
 
     }
 
-    private Tile newTileState(int state){
+    private Tile newTileState(int state, String msg){
         Tile tile = getQsTile();
         switch (state){
             case Tile.STATE_ACTIVE:
                 tile.setIcon(Icon.createWithResource(this,
                         R.drawable.ic_lightbulb_on));
-                tile.setLabel(getString(R.string.tile_on));
+                tile.setLabel(msg);
                 tile.setContentDescription(
                         getString(R.string.tile_content_description));
                 tile.setState(Tile.STATE_ACTIVE);
@@ -118,7 +121,7 @@ public class QstService extends TileService implements Rx2BulbContract.View {
             case Tile.STATE_INACTIVE:
                 tile.setIcon(Icon.createWithResource(this,
                         R.drawable.ic_lightbulb_off));
-                tile.setLabel(getString(R.string.tile_off));
+                tile.setLabel(msg);
                 tile.setContentDescription(
                         getString(R.string.tile_content_description));
                 tile.setState(Tile.STATE_INACTIVE);
@@ -128,7 +131,7 @@ public class QstService extends TileService implements Rx2BulbContract.View {
             default:
                 tile.setIcon(Icon.createWithResource(this,
                         R.drawable.ic_lightbulb_not_available));
-                tile.setLabel(getString(R.string.not_available));
+                tile.setLabel(msg);
                 tile.setContentDescription(
                         getString(R.string.tile_content_description));
                 tile.setState(Tile.STATE_UNAVAILABLE);

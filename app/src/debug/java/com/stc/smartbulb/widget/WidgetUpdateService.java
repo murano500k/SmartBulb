@@ -6,12 +6,12 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
-import com.stc.smartbulb.R;
 import com.stc.smartbulb.Device;
-import com.stc.smartbulb.model.NetworkChangeReceiver;
-import com.stc.smartbulb.Rx2DeviceManager;
+import com.stc.smartbulb.R;
 import com.stc.smartbulb.Rx2BulbContract;
+import com.stc.smartbulb.Rx2DeviceManager;
 import com.stc.smartbulb.Rx2Presenter;
+import com.stc.smartbulb.model.NetworkChangeReceiver;
 import com.stc.smartbulb.trigger.TriggerAlarmService;
 
 

@@ -16,7 +16,7 @@
     <string name="not_available">Not available</string>
     <string name="tile_content_description">Lightbulb</string>
     <string name="tile_off">Light off</string>
-    <string name="tile_on">Light off</string>
+    <string name="tile_on">Light on</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
@@ -56,6 +56,7 @@
     <string name="parent_app_package">com.yeelight.cherry</string>
     <string name="open_parent_app">Open Yeelight app</string>
     <string name="click_to_test">Click power to test bulb</string>
+    <string name="parent_app_icon_url">https://lh3.googleusercontent.com/77-VjwzZYcedr03X7YJVileas5sllrpXNIIOP4PoqKaLf5n4Bg7c7XnsZq18yKAOhw=w300-rw</string>
 
 
 </resources>

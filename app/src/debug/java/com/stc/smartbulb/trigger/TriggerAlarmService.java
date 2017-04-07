@@ -8,9 +8,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.stc.smartbulb.Device;
-import com.stc.smartbulb.model.NetworkChangeReceiver;
 import com.stc.smartbulb.Rx2BulbContract;
 import com.stc.smartbulb.Rx2Presenter;
+import com.stc.smartbulb.model.NetworkChangeReceiver;
 
 public class TriggerAlarmService extends IntentService implements Rx2BulbContract.View {
     private static final String TAG = TriggerAlarmService.class.getSimpleName();
