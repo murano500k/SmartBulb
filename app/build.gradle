@@ -18,7 +18,7 @@ android {
         applicationId "com.stc.smartbulb"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
+        versionCode 8
         versionName "1.0"
         jackOptions {
             enabled true

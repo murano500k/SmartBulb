@@ -30,6 +30,11 @@
             </intent-filter>
         </service>
 
+        <receiver android:name=".model.NetworkChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.ConnectivityManager.CONNECTIVITY_ACTION"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 

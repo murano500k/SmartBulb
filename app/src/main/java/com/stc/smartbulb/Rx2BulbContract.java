@@ -10,7 +10,7 @@ public interface Rx2BulbContract {
         void setPresenter(Presenter presenter);
     }
     interface Presenter {
-        void sendCmd(String cmd, boolean isConnected);
+        void sendCmd(String cmd);
         void cancel();
         boolean isRunning();
     }

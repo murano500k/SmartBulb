@@ -22,8 +22,8 @@ public class Rx2DeviceManager {
             "HOST:239.255.255.250:1982\r\n" +
             "MAN:\"ssdp:discover\"\r\n" +
             "ST:wifi_bulb\r\n";
-    public static final String CMD_ON = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"on\",\"smooth\",500]}\r\n" ;
-    public static final String CMD_OFF = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"off\",\"smooth\",500]}\r\n" ;
+    public static final String CMD_ON = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"on\",\"smooth\",2000]}\r\n" ;
+    public static final String CMD_OFF = "{\"id\":%id,\"method\":\"set_power\",\"params\":[\"off\",\"smooth\",2000]}\r\n" ;
     public static final String CMD_TOGGLE = "{\"id\":%id,\"method\":\"toggle\",\"params\":[]}\r\n" ;
     public static final String CMD_GET_PROP = "{\"id\":%id,\"method\":\"get_prop\",\"params\":[\"power\"]}\r\n" ;
 

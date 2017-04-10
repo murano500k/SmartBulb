@@ -1,3 +1,4 @@
+/*
 package com.stc.smartbulb.ui;
 
 import android.content.Context;
@@ -318,3 +319,4 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 }
+*/

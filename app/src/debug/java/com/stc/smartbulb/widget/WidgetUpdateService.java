@@ -1,3 +1,4 @@
+/*
 package com.stc.smartbulb.widget;
 
 import android.app.IntentService;
@@ -15,9 +16,11 @@ import com.stc.smartbulb.model.NetworkChangeReceiver;
 import com.stc.smartbulb.trigger.TriggerAlarmService;
 
 
+*/
 /**
  * Created by artem on 4/6/17.
- */
+ *//*
+
 public class WidgetUpdateService extends IntentService implements Rx2BulbContract.View {
     private static final String TAG = WidgetUpdateService.class.getSimpleName();
 
@@ -37,7 +40,7 @@ public class WidgetUpdateService extends IntentService implements Rx2BulbContrac
     protected void onHandleIntent(Intent intent) {
         new Rx2Presenter(this);
         mAppWidgetManager = AppWidgetManager.getInstance(this);
-        mPresenter.sendCmd(Rx2DeviceManager.CMD_GET_PROP, NetworkChangeReceiver.isMyNetworkConnected(this));
+        mPresenter.sendCmd(Rx2DeviceManager.CMD_GET_PROP, NetworkChangeReceiver.homeWifiConnected(this));
     }
     @Override
     public void newState(Device device, String msg){
@@ -67,4 +70,4 @@ public class WidgetUpdateService extends IntentService implements Rx2BulbContrac
     public void setPresenter(Rx2BulbContract.Presenter presenter) {
         this.mPresenter=presenter;
     }
-}
+}*/

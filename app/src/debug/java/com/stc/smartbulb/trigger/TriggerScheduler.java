@@ -1,3 +1,4 @@
+/*
 package com.stc.smartbulb.trigger;
 
 import android.app.AlarmManager;
@@ -5,9 +6,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.util.Log;
 
+*/
 /**
  * Created by artem on 4/6/17.
- */
+ *//*
+
 
 public class TriggerScheduler {
     private static final String TAG = "TriggerScheduler";
@@ -22,3 +25,4 @@ public class TriggerScheduler {
         manager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, operation);
     }
 }
+*/

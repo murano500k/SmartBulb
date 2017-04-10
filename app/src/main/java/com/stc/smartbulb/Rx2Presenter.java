@@ -3,7 +3,6 @@ package com.stc.smartbulb;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
@@ -39,45 +38,42 @@ public class Rx2Presenter implements Rx2BulbContract.Presenter {
     }
 
     @Override
-    public void sendCmd(String cmd, boolean isConnected) {
+    public void sendCmd(String cmd) {
         Observable<Device> deviceObservable;
-
-        if (!isConnected) {
-
-            deviceObservable = Observable.error(new ConnectException("Wifi not connected"));
-
-        } else {
+        if(mDevice!=null && cmd==Rx2DeviceManager.CMD_GET_PROP) deviceObservable=Observable.just(mDevice);
+        else {
 
             deviceObservable = Observable.just(cmd)
 
-                .distinct()
-                .take(1)
+                    .distinct()
+                    .take(1)
 
-                .zipWith(socketSingle().toObservable(), (s, socket) -> {
-                    if (socket == null || socket.isClosed()) throw new IOException("socket closed");
-                    mDeviceManager.writeCmd(s, socket);
-                    return socket;
-                })
+                    .zipWith(socketSingle().toObservable(), (s, socket) -> {
+                        if (socket == null || socket.isClosed())
+                            throw new IOException("socket closed");
+                        mDeviceManager.writeCmd(s, socket);
+                        return socket;
+                    })
                     .subscribeOn(Schedulers.io())
                     .flatMap(new Function<Socket, ObservableSource<String>>() {
-                    @Override
-                    public ObservableSource<String> apply(@NonNull Socket socket) throws Exception {
-                        return Observable.create(e -> {
-                            mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-                            e.setCancellable(() -> {
-                                mSocket.close();
-                                mBos.close();
+                        @Override
+                        public ObservableSource<String> apply(@NonNull Socket socket) throws Exception {
+                            return Observable.create(e -> {
+                                mBos = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                                e.setCancellable(() -> {
+                                    mSocket.close();
+                                    mBos.close();
+                                });
+                                while (mSocket != null && mSocket.isConnected() && !mSocket.isClosed()) {
+                                    if (mBos.ready()) e.onNext(mBos.readLine());
+                                }
                             });
-                            while (mSocket != null && mSocket.isConnected() && !mSocket.isClosed()) {
-                                if (mBos.ready()) e.onNext(mBos.readLine());
-                            }
-                        });
-                    }
-                })
+                        }
+                    })
                     .map(s -> {
-                    if (mDevice == null) throw new NullPointerException("device null");
-                    return mDeviceManager.parseMsg(s, mDevice);
-                });
+                        if (mDevice == null) throw new NullPointerException("device null");
+                        return mDeviceManager.parseMsg(s, mDevice);
+                    });
         }
 
         deviceObservable
@@ -95,6 +91,7 @@ public class Rx2Presenter implements Rx2BulbContract.Presenter {
     @Override
     public void cancel() {
         if(mDisposables !=null && !mDisposables.isDisposed()) mDisposables.dispose();
+        mSocket=null;
     }
 
     @Override

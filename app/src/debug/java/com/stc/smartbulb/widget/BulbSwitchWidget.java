@@ -1,3 +1,4 @@
+/*
 package com.stc.smartbulb.widget;
 
 import android.appwidget.AppWidgetManager;
@@ -29,3 +30,4 @@ public class BulbSwitchWidget extends AppWidgetProvider {
     }
 }
 
+*/

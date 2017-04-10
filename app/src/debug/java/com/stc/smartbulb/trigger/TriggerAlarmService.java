@@ -1,3 +1,4 @@
+/*
 package com.stc.smartbulb.trigger;
 
 import android.app.IntentService;
@@ -69,3 +70,4 @@ public class TriggerAlarmService extends IntentService implements Rx2BulbContrac
 
 
 }
+*/

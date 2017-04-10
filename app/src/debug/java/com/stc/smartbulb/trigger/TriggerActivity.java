@@ -1,3 +1,4 @@
+/*
 package com.stc.smartbulb.trigger;
 
 import android.os.Bundle;
@@ -162,3 +163,4 @@ public class TriggerActivity extends AppCompatActivity {
 
 
 }
+*/
